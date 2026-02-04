@@ -27,7 +27,7 @@ public class ClienteController {
     }//cadastro de usuario, recebe requisições HTTP Json e manda para as regras de negocio service.
 
     @GetMapping
-    public ResponseEntity<List<ClienteDTO>> listarUsuarios(Usuario usuarioLogado) {
+    public ResponseEntity<List<ClienteDTO>> listarUsuarios(@AuthenticationPrincipal Usuario usuarioLogado) {
         return ResponseEntity.ok(service.listarUsuarios(usuarioLogado));
     }
 

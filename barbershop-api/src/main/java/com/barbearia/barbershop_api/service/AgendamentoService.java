@@ -180,14 +180,17 @@ public class AgendamentoService {
             if(dto.clienteId() == null){
                 throw new RuntimeException("Admin deve informar o id do cliente!");
             }
+            cliente = clienteRepository.findByUsuarioId(dto.clienteId()).orElseThrow(() -> new RuntimeException("Cliente não encontrado!"));
         }else {
              cliente = clienteRepository.findByUsuarioId(usuarioLogado.getId()).orElseThrow(() -> new IllegalArgumentException("Erro: Perfil de CLiente não encontrado para este usuário!"));
         }
-        cliente = clienteRepository.findById(cliente.getId()).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
+
         boolean ehDono = cliente.getUsuario().getId().equals(usuarioLogado.getId());
-        if(!ehDono){
+        boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
+        if(!ehDono && !ehAdmin){
             throw new IllegalArgumentException("Você não pode realizar agendamentos por outra pessoa!");
         }
+
         var servico = servicoRepository.findById(dto.servicoId()).orElseThrow(() -> new RuntimeException("Servico não encontrado com o ID informado!"));
 
         LocalDateTime dataInicio = dto.dataHoraInicio();    //Horario do inicio do corte
@@ -227,6 +230,7 @@ public class AgendamentoService {
         Agendamento agendamento = new Agendamento();
         agendamento.setDataHoraInicio(dataInicio);
         agendamento.setDataHoraFim(dataFim);
+        agendamento.setCliente(cliente);
         agendamento.setServico(servico);
         return agendamentoRepository.save(agendamento);
     }
