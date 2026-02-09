@@ -84,15 +84,15 @@ public class AgendamentoService {
         boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN; //salva perfil admin numa variavel
         boolean ehDono = agendamento.getCliente().getUsuario().getId().equals(usuarioLogado.getId()); // perfil cliente
 
-        if(!ehAdmin && !ehDono){
-            throw  new RuntimeException("Acesso negado! Você não pode alterar o agendamento de outra pessoa!"); // se não for dono nem adm laça erro
+        if (!ehAdmin && !ehDono) {
+            throw new RuntimeException("Acesso negado! Você não pode alterar o agendamento de outra pessoa!"); // se não for dono nem adm laça erro
         }
 
         Servico servico = servicoRepository.findById(dados.servicoId()).orElseThrow(() -> new IllegalArgumentException("Servico não encontrado")); //pesquisa serviço
         Cliente cliente;
-        if(ehAdmin){
+        if (ehAdmin) {
             cliente = clienteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("CLiente alvo não encontrado."));
-        }else {
+        } else {
             cliente = agendamento.getCliente();
         }
         LocalDateTime dataFinal = dados.dataHoraInicio().plusMinutes(servico.getDuracaoMinutos());
@@ -175,38 +175,43 @@ public class AgendamentoService {
     }
 
     public Agendamento realizarAgendamento(DadosEntradaCadastroAgendamento dto, Usuario usuarioLogado) {
+        // 1. Validar data no futuro
+        if (dto.dataHoraInicio().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Não é permitido agendar no passado!");
+        }
+        // 2. Buscar cliente baseado no perfil
         Cliente cliente;
-        if(usuarioLogado.getPerfil() == Perfil.ADMIN){  //ve se é um admin fazendo o agendamento
-            if(dto.clienteId() == null){
-                throw new RuntimeException("Admin deve informar o id do cliente!");
+        if (usuarioLogado.getPerfil() == Perfil.ADMIN) {
+            if (dto.clienteId() == null) {
+                throw new IllegalArgumentException("Admin deve informar o id do cliente!");
             }
-            cliente = clienteRepository.findByUsuarioId(dto.clienteId()).orElseThrow(() -> new RuntimeException("Cliente não encontrado!"));
-        }else {
-             cliente = clienteRepository.findByUsuarioId(usuarioLogado.getId()).orElseThrow(() -> new IllegalArgumentException("Erro: Perfil de CLiente não encontrado para este usuário!"));
+            cliente = clienteRepository.findById(dto.clienteId()).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
+        } else {
+            cliente = clienteRepository.findByUsuarioId(usuarioLogado.getId()).orElseThrow(() -> new IllegalArgumentException("Perfil de cliente não encontrado para este usuário!"));
         }
 
-        boolean ehDono = cliente.getUsuario().getId().equals(usuarioLogado.getId());
-        boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
-        if(!ehDono && !ehAdmin){
-            throw new IllegalArgumentException("Você não pode realizar agendamentos por outra pessoa!");
-        }
+        // 3. Validar permissão do usuário
+        validarUsuario(usuarioLogado, cliente);
 
-        var servico = servicoRepository.findById(dto.servicoId()).orElseThrow(() -> new RuntimeException("Servico não encontrado com o ID informado!"));
+        // 4. Buscar serviço
+        var servico = servicoRepository.findById(dto.servicoId()).orElseThrow(() -> new IllegalArgumentException("Serviço não encontrado com o ID informado!"));
 
-        LocalDateTime dataInicio = dto.dataHoraInicio();    //Horario do inicio do corte
-        LocalDateTime dataFim = dto.dataHoraInicio().plusMinutes(servico.getDuracaoMinutos()); //Horario do fim do corte
+        // 5. Calcular horários
+        LocalDateTime dataInicio = dto.dataHoraInicio();
+        LocalDateTime dataFim = dataInicio.plusMinutes(servico.getDuracaoMinutos());
+        LocalDate diaAgendamento = dataInicio.toLocalDate();
 
-        LocalDate diaAgendamento = dataInicio.toLocalDate(); //dia do agendamento
+        // 6. Buscar horários de funcionamento do dia
         var diaEspecialOpt = diaEspecialRepository.findByData(diaAgendamento);
 
-        LocalDateTime limiteAbertura; // variaveis controle de tempo horario inicio expediente
-        LocalDateTime limiteFechamento; // variavel controle de tempo fim do expediente
+        LocalDateTime limiteAbertura;
+        LocalDateTime limiteFechamento;
 
         if (diaEspecialOpt.isPresent()) {
             var dia = diaEspecialOpt.get();
 
             if (Boolean.TRUE.equals(dia.getDiaFolga())) {
-                throw new RuntimeException("É dia de folga! Estamos fechados!");
+                throw new IllegalArgumentException("É dia de folga! Estamos fechados!");
             }
             limiteAbertura = LocalDateTime.of(diaAgendamento, dia.getHorarioAbertura());
 
@@ -219,14 +224,19 @@ public class AgendamentoService {
             limiteAbertura = LocalDateTime.of(diaAgendamento, LocalTime.of(8, 0));
             limiteFechamento = LocalDateTime.of(diaAgendamento, LocalTime.of(18, 0));
         }
-        if (dataInicio.isBefore(limiteAbertura) || dataFim.isAfter(limiteFechamento)) {
-            throw new RuntimeException("Horário fora do expediente da Barbearia!");
-        }
-        var conflitos = agendamentoRepository.findConflitos(dataInicio, dataFim);
 
-        if (!conflitos.isEmpty()) {
-            throw new RuntimeException("Horário indisponível. Alguém já reservou!");
+        // 7. Validar se está dentro do expediente
+        if (dataInicio.isBefore(limiteAbertura) || dataFim.isAfter(limiteFechamento)) {
+            throw new IllegalArgumentException("Horário fora do expediente da barbearia!");
         }
+
+        // 8. Validar conflitos de horário
+        var conflitos = agendamentoRepository.findConflitos(dataInicio, dataFim);
+        if (!conflitos.isEmpty()) {
+            throw new IllegalArgumentException("Horário indisponível. Alguém já reservou!");
+        }
+
+        // 9. Criar e salvar agendamento
         Agendamento agendamento = new Agendamento();
         agendamento.setDataHoraInicio(dataInicio);
         agendamento.setDataHoraFim(dataFim);
@@ -234,23 +244,27 @@ public class AgendamentoService {
         agendamento.setServico(servico);
         return agendamentoRepository.save(agendamento);
     }
-    public List<SaidaAgendamentoDTO> listarHistoricoCLiente(Integer id, Usuario usuarioLogado){
-        Cliente cliente = clienteRepository.findById(id).orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
 
-        boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
-        boolean ehDono = cliente.getUsuario().getId().equals(usuarioLogado.getId());
-        if(!ehAdmin && !ehDono){
-            throw new IllegalArgumentException("Erro: Você não pode consultar o histórico de outra pessoa!");
-        }
+    public List<SaidaAgendamentoDTO> listarHistoricoCLiente(Integer id, Usuario usuarioLogado) {
+        Cliente cliente = clienteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
+        validarUsuario(usuarioLogado, cliente);
         var agendamento = agendamentoRepository.findByClienteIdOrderByDataHoraInicioDesc(id);
 
         return agendamento.stream()
                 .map(SaidaAgendamentoDTO::new)
                 .toList();
     }
-    public List<ItemRankingDTO> listarRankingServicos(){
+
+    public List<ItemRankingDTO> listarRankingServicos() {
         return agendamentoRepository.findRankingServicos().stream()
                 .limit(5)
                 .toList();
+    }
+        public void validarUsuario(Usuario usuarioLogado, Cliente cliente){
+        boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
+        boolean ehDono = cliente.getUsuario().getId().equals(usuarioLogado.getId());
+        if (!ehAdmin && !ehDono) {
+            throw new IllegalArgumentException("Erro! Você não tem permissão para realizar está ação!");
+        }
     }
 }
