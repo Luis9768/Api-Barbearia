@@ -53,12 +53,7 @@ public class AgendamentoService {
         var autenticacao = SecurityContextHolder.getContext().getAuthentication();
         usuarioLogado = (Usuario) autenticacao.getPrincipal();
 
-        boolean ehDono = agendamento.getCliente().getUsuario().getId().equals(usuarioLogado.getId());
-        boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
-
-        if (!ehAdmin && !ehDono) {
-            throw new RuntimeException("Acesso Negado: Você não tem permissão para cancelar este agendamento.");
-        }
+        validarUsuario(usuarioLogado, agendamento.getCliente());
 
         LocalDateTime dataAgendamento = agendamento.getDataHoraInicio();
         LocalDateTime agora = LocalDateTime.now();
@@ -81,16 +76,13 @@ public class AgendamentoService {
 
         Agendamento agendamento = agendamentoRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Agendamento não encontrado")); //busca o id
 
-        boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN; //salva perfil admin numa variavel
-        boolean ehDono = agendamento.getCliente().getUsuario().getId().equals(usuarioLogado.getId()); // perfil cliente
-
-        if (!ehAdmin && !ehDono) {
-            throw new RuntimeException("Acesso negado! Você não pode alterar o agendamento de outra pessoa!"); // se não for dono nem adm laça erro
-        }
+        validarUsuario(usuarioLogado, agendamento.getCliente());
 
         Servico servico = servicoRepository.findById(dados.servicoId()).orElseThrow(() -> new IllegalArgumentException("Servico não encontrado")); //pesquisa serviço
         Cliente cliente;
-        if (ehAdmin) {
+        //se o usuario for admin ele pode escolher o cliente para reagendar, caso contrário ele só pode reagendar para o cliente do agendamento
+
+        if(usuarioLogado.getPerfil() == Perfil.ADMIN && dados.clienteId() != null) {
             cliente = clienteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("CLiente alvo não encontrado."));
         } else {
             cliente = agendamento.getCliente();
@@ -111,11 +103,12 @@ public class AgendamentoService {
     }
 
     public Double calcularFaturamento(LocalDate data) {
+        //controle de tempo para o inicio e fim do dia, para fazer a consulta no banco de dados
         var inicio = data.atStartOfDay();
         var fim = data.atTime(23, 59, 59);
-        if (data.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Não é permitido consultar datas futuras.");
-        }
+        //validar se a data é futura, caso seja lança uma exceção
+        validarDataFuturo(data);
+        //realiza a consulta no banco de dados para somar o faturamento do dia, caso o resultado seja nulo retorna 0.00
         Double resultado = agendamentoRepository.somarFaturamentoPorData(inicio, fim);
         if (resultado == null) {
             return 0.00;
@@ -176,9 +169,8 @@ public class AgendamentoService {
 
     public Agendamento realizarAgendamento(DadosEntradaCadastroAgendamento dto, Usuario usuarioLogado) {
         // 1. Validar data no futuro
-        if (dto.dataHoraInicio().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Não é permitido agendar no passado!");
-        }
+        validarDataPassado(dto.dataHoraInicio());
+
         // 2. Buscar cliente baseado no perfil
         Cliente cliente;
         if (usuarioLogado.getPerfil() == Perfil.ADMIN) {
@@ -260,11 +252,24 @@ public class AgendamentoService {
                 .limit(5)
                 .toList();
     }
-        public void validarUsuario(Usuario usuarioLogado, Cliente cliente){
+
+    public void validarUsuario(Usuario usuarioLogado, Cliente cliente) {
         boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
         boolean ehDono = cliente.getUsuario().getId().equals(usuarioLogado.getId());
         if (!ehAdmin && !ehDono) {
             throw new IllegalArgumentException("Erro! Você não tem permissão para realizar está ação!");
+        }
+    }
+
+    public void validarDataPassado(LocalDateTime data) {
+        if (data.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Não é permitido agendar no passado!");
+        }
+    }
+
+    public void validarDataFuturo(LocalDate data) {
+        if (data.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Não é permitido consultar datas futuras!");
         }
     }
 }
