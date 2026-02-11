@@ -60,9 +60,9 @@ public class AgendamentoService {
         LocalDate diaAgendamento = dataInicio.toLocalDate();
 
         // 6. Buscar horários de funcionamento do dia
-        validacaoHorarioExpediente(dataInicio,dataFim,dto);
+        validacaoHorarioExpediente(dto,servico);
 
-        // 8. Validar conflitos de horário
+        // 7. Validar conflitos de horário
         var conflitos = agendamentoRepository.findConflitos(dataInicio, dataFim);
         if (!conflitos.isEmpty()) {
             throw new IllegalArgumentException("Horário indisponível. Alguém já reservou!");
@@ -233,7 +233,7 @@ public class AgendamentoService {
                 .toList();
     }
 
-    public void validarUsuario(Usuario usuarioLogado, Cliente cliente) {
+    private void validarUsuario(Usuario usuarioLogado, Cliente cliente) {
         boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
         boolean ehDono = cliente.getUsuario().getId().equals(usuarioLogado.getId());
         if (!ehAdmin && !ehDono) {
@@ -241,28 +241,28 @@ public class AgendamentoService {
         }
     }
 
-    public void validarDataPassado(LocalDateTime data) {
+    private void validarDataPassado(LocalDateTime data) {
         if (data.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Não é permitido agendar no passado!");
         }
     }
 
-    public void validarDataFuturo(LocalDate data) {
+    private void validarDataFuturo(LocalDate data) {
         if (data.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Não é permitido consultar datas futuras!");
         }
     }
 
-    public void validacaoHorarioExpediente(DadosEntradaCadastroAgendamento dto) {
-        Servico servico = servicoRepository.findById(dto.servicoId()).orElseThrow(() -> new IllegalArgumentException("Serviço não encontrado com o ID informado!"));
-        LocalDate diaAgendamento = dataHoraInicio.toLocalDate();
-        var diaEspecialOpt = diaEspecialRepository.findByData(diaAgendamento);
+    private void validacaoHorarioExpediente(DadosEntradaCadastroAgendamento dto, Servico servico) {
+        LocalDateTime dataHoraInicio = dto.dataHoraInicio();
+
+        LocalDate diaAgendamento = dataHoraInicio.toLocalDate(); //data do agendamento para pesquisar o dia especial
+        var diaEspecialOpt = diaEspecialRepository.findByData(diaAgendamento); // pesquisa se tem um dia especial cadastrado para a data do agendamento, caso tenha ele retorna um Optional com o dia especial, caso contrário ele retorna um Optional vazio
 
         LocalDateTime limiteAbertura;
         LocalDateTime limiteFechamento;
 
-        LocalDateTime dataInicio = dto.dataHoraInicio();
-        LocalDateTime dataFim = dataInicio.plusMinutes(servico.getDuracaoMinutos());
+        LocalDateTime dataFim = dataHoraInicio.plusMinutes(servico.getDuracaoMinutos());
 
         if (diaEspecialOpt.isPresent()) {
             var dia = diaEspecialOpt.get();
@@ -281,7 +281,7 @@ public class AgendamentoService {
             limiteAbertura = LocalDateTime.of(diaAgendamento, LocalTime.of(8, 0));
             limiteFechamento = LocalDateTime.of(diaAgendamento, LocalTime.of(18, 0));
         }
-        if (dataInicio.isBefore(limiteAbertura) || dataFim.isAfter(limiteFechamento)) {
+        if (dataHoraInicio.isBefore(limiteAbertura) || dataFim.isAfter(limiteFechamento)) {
             throw new IllegalArgumentException("Horário fora do expediente da barbearia!");
         }
     }
