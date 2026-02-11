@@ -38,6 +38,8 @@ public class Agendamento {
 
     private Boolean ativo = true;
 
+    private StatusAgendamento statusAgendamento;
+
     @PrePersist
     public void prePersist() {
         if (this.ativo == null) {
