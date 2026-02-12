@@ -82,7 +82,7 @@ class AgendamentoServiceTest {
 
 
         when(agendamentoRepository.contarConflitos(any(), any())).thenReturn(1);
-        assertThrows(IllegalArgumentException.class, () -> service.cadastrar(dados));    }
+        assertThrows(IllegalArgumentException.class, () -> service.realizarAgendamento(dados));    }
     @Test
     void deveReagendarComSucesso() {
         // 1. ARRANGE
@@ -124,7 +124,7 @@ class AgendamentoServiceTest {
         when(agendamentoRepository.contarConflitosParaReagendamento(any(), any(), eq(idAgendamento)))
                 .thenReturn(0);
 
-        service.reagendar(idAgendamento, dadosNovos);
+        service.reagendar(idAgendamento, dadosNovos,clienteFake.getUsuario());
 
         verify(agendamentoRepository).save(argThat(agendamentoSalvo ->
                 agendamentoSalvo.getDataHoraInicio().equals(novaData) &&
