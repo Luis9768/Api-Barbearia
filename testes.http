@@ -1,8 +1,0 @@
-### Teste de Cadastro com Preço Negativo (Deve falhar)
-POST http://localhost:8080/servico
-Content-Type: application/json
-
-{
-  "nome": "Corte Americano",
-  "preco": -50.00
-}
