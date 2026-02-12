@@ -7,7 +7,6 @@ import lombok.NonNull;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.sql.Update;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 

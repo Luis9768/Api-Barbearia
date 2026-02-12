@@ -1,6 +1,8 @@
 package com.barbearia.barbershop_api.repository;
 
 import com.barbearia.barbershop_api.model.Agendamento;
+import com.barbearia.barbershop_api.model.Cliente;
+import com.barbearia.barbershop_api.model.StatusAgendamento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,9 +17,13 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Intege
     Integer contarConflitos(@Param("inicio") LocalDateTime inicio,
                             @Param("fim") LocalDateTime fim);
 
-    @Query("SELECT SUM(s.preco) FROM Agendamento a JOIN a.servico s " +
-            "WHERE a.dataHoraInicio BETWEEN :inicioDia AND :fimDia")
-    Double somarFaturamentoPorData(@Param("inicioDia") LocalDateTime inicioDia, @Param("fimDia") LocalDateTime fimDia);
+    @Query("""
+    SELECT SUM(s.preco) 
+    FROM Agendamento a 
+    JOIN a.servico s 
+    WHERE a.dataHoraInicio BETWEEN :inicio AND :fim 
+    AND a.statusAgendamento = :status
+""") Double somarFaturamentoPorStatus(LocalDateTime inicio, LocalDateTime fim, StatusAgendamento status);
 
     List<Agendamento> findByDataHoraInicioBetween(LocalDateTime inicio, LocalDateTime fim);
 
@@ -35,4 +41,6 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Intege
 
     @Query("SELECT s.nome AS nome, COUNT(a) AS quantidade FROM Agendamento a JOIN a.servico s GROUP BY s.nome ORDER BY quantidade DESC")
     List<ItemRankingDTO> findRankingServicos();
+
+    List<Agendamento> findByClienteAndDataHoraInicioBetween(Cliente cliente, LocalDateTime inicio, LocalDateTime fim);
 }

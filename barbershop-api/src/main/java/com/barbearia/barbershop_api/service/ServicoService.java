@@ -1,6 +1,8 @@
 package com.barbearia.barbershop_api.service;
 
+import com.barbearia.barbershop_api.model.Perfil;
 import com.barbearia.barbershop_api.model.Servico;
+import com.barbearia.barbershop_api.model.Usuario;
 import com.barbearia.barbershop_api.repository.AgendamentoRepository;
 import com.barbearia.barbershop_api.repository.ServicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +50,7 @@ public class ServicoService {
         return repository.save(servicoAntigo);
     }//aqui ele atualizar o servico X buscando ele por Id e salvando os dados novos
 
-    public void excluirId(Integer id){
+    public void excluirId(Integer id) {
         if(agendamentoRepository.existeAgendamentoFuturoParaOServico(id)){
             throw new IllegalArgumentException("Não é possível excluir o serviço. Existem agendamentos futuros pendentes para ele.");
         }

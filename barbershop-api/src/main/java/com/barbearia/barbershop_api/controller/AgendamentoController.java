@@ -4,6 +4,7 @@ import com.barbearia.barbershop_api.dto.SaidaAgendamentoDTO;
 import com.barbearia.barbershop_api.dto.DadosEntradaCadastroAgendamento;
 import com.barbearia.barbershop_api.dto.FaturamentoDTO;
 import com.barbearia.barbershop_api.model.Agendamento;
+import com.barbearia.barbershop_api.model.Cliente;
 import com.barbearia.barbershop_api.model.Perfil;
 import com.barbearia.barbershop_api.model.Usuario;
 import com.barbearia.barbershop_api.repository.ClienteRepository;
@@ -45,8 +46,8 @@ public class AgendamentoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(dtoSaida);
     }
     @GetMapping("/listarAgendamentos")
-    public ResponseEntity<List<SaidaAgendamentoDTO>> listarAgendamentos(@RequestParam(required = false) LocalDate data){
-        return ResponseEntity.ok(service.listarAgendamentos(data));
+    public ResponseEntity<List<SaidaAgendamentoDTO>> listarAgendamentos(@RequestParam(required = false) LocalDate data, @AuthenticationPrincipal Cliente cliente){
+        return ResponseEntity.ok(service.listarAgendamentos(data, cliente));
     }
     @GetMapping("/listarHorariosDisponiveis")
     public ResponseEntity<List<LocalTime>> listarHorariosDisponiveis(@RequestParam LocalDate data, @RequestParam Integer servicoId ){
@@ -69,8 +70,8 @@ public class AgendamentoController {
     }
     @GetMapping("/faturamento")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<FaturamentoDTO> faturamento(@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate data){
-        BigDecimal resultado = BigDecimal.valueOf(service.calcularFaturamento(data));
+    public ResponseEntity<FaturamentoDTO> faturamento(@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate data, @AuthenticationPrincipal Usuario usuarioLogado){
+        BigDecimal resultado = BigDecimal.valueOf(service.calcularFaturamento(data, usuarioLogado));
         FaturamentoDTO faturamentoDTO = new FaturamentoDTO();
         faturamentoDTO.setMensagem("Faturamento do dia "+data);
         faturamentoDTO.setValor(resultado);

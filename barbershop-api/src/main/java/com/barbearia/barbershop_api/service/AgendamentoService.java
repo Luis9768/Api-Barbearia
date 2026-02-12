@@ -184,38 +184,33 @@ public class AgendamentoService {
         return horariosLivres; // e retorna os horarios livres
     }
 
-    public List<SaidaAgendamentoDTO> listarAgendamentos(LocalDate data) {
-        if (data == null) {
-            return agendamentoRepository.findAll().stream()
-                    .map(SaidaAgendamentoDTO::new)
-                    .toList();
+    public List<SaidaAgendamentoDTO> listarAgendamentos(LocalDate data, Cliente cliente) {
+        validarUsuario(cliente.getUsuario(),cliente); //valida o usuario logado para ver se ele tem permissão para listar os agendamento, caso seja admin ele pode listar os agendamento de todos os clientes, caso seja cliente ele só pode listar os agendamento do proprio cliente
+
+        LocalDate dataBusca = (data != null )? data : LocalDate.now(); // se a data for diferente de nulo ele pesquisa a data, caso contrário ele pesquisa a data atual
             //metodo listar agendamentos caso a data esteja vazia
-        } else {
             var inicio = data.atStartOfDay();
             var fim = data.atTime(23, 59, 59);
-            return agendamentoRepository.findByDataHoraInicioBetween(inicio, fim).stream()
+            List<Agendamento> listarAgendamentos;
+            if(cliente.getUsuario().getPerfil() == Perfil.ADMIN ){
+                listarAgendamentos = agendamentoRepository.findByDataHoraInicioBetween(inicio, fim);
+            }else {
+                listarAgendamentos = agendamentoRepository.findByClienteAndDataHoraInicioBetween(cliente, inicio, fim);
+            }
+            return agendamentoRepository.findByDataHoraInicioBetween(inicio, fim)
+                    .stream()
                     .map(SaidaAgendamentoDTO::new)
-                    .toList();
-        }//se vier com a data preenchida ele retorna com esse filtro de data
-    }
-
-    public Double calcularFaturamento(LocalDate data) {
-
-        //controle de tempo para o inicio e fim do dia, para fazer a consulta no banco de dados
+                    .toList(); //se vier com a data preenchida ele retorna com esse filtro de data
+        }
+    public Double calcularFaturamento(LocalDate data, Usuario usuarioLogado) {
+        validarUsuario(usuarioLogado, null);
+        validarDataFuturo(data);
         var inicio = data.atStartOfDay();
         var fim = data.atTime(23, 59, 59);
-
-        //validar se a data é futura, caso seja lança uma exceção
-        validarDataFuturo(data);
-        Double resultado = agendamentoRepository.somarFaturamentoPorData(inicio, fim); //realiza a consulta no banco de dados para somar o faturamento do dia, caso o resultado seja nulo retorna 0.00
-
-        if (resultado == null) {
-            return 0.00;
-        } else {
-            return resultado;
-        }
+        var status = StatusAgendamento.CONCLUIDO;
+        Double resultado = agendamentoRepository.somarFaturamentoPorStatus(inicio, fim,status); //realiza a consulta no banco de dados para somar o faturamento do dia, caso o resultado seja nulo retorna 0.00
+        return resultado == null ? 0.0 : resultado;
     }
-
     public List<SaidaAgendamentoDTO> listarHistoricoCLiente(Integer id, Usuario usuarioLogado) {
         Cliente cliente = clienteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
         validarUsuario(usuarioLogado, cliente);
@@ -225,13 +220,11 @@ public class AgendamentoService {
                 .map(SaidaAgendamentoDTO::new)
                 .toList();
     }
-
     public List<ItemRankingDTO> listarRankingServicos() {
         return agendamentoRepository.findRankingServicos().stream()
                 .limit(5)
                 .toList();
     }
-
     private void validarUsuario(Usuario usuarioLogado, Cliente cliente) {
         boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
         boolean ehDono = cliente.getUsuario().getId().equals(usuarioLogado.getId());
@@ -239,19 +232,16 @@ public class AgendamentoService {
             throw new IllegalArgumentException("Erro! Você não tem permissão para realizar está ação!");
         }
     }
-
     private void validarDataPassado(LocalDateTime data) {
         if (data.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Não é permitido agendar no passado!");
         }
     }
-
     private void validarDataFuturo(LocalDate data) {
         if (data.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Não é permitido consultar datas futuras!");
         }
     }
-
     private void validacaoHorarioExpediente(LocalDateTime dataInicio, LocalDateTime dataFim) {
 
         LocalDate diaAgendamento = dataInicio.toLocalDate(); //data do agendamento para pesquisar o dia especial
@@ -259,7 +249,6 @@ public class AgendamentoService {
 
         LocalDateTime limiteAbertura;
         LocalDateTime limiteFechamento;
-
 
         if (diaEspecialOpt.isPresent()) {
             var dia = diaEspecialOpt.get();
@@ -287,4 +276,5 @@ public class AgendamentoService {
         }
 
     }
+
 }
