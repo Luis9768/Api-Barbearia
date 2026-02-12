@@ -60,13 +60,10 @@ public class AgendamentoService {
         LocalDate diaAgendamento = dataInicio.toLocalDate();
 
         // 6. Buscar horários de funcionamento do dia
-        validacaoHorarioExpediente(dto,servico);
+        validacaoHorarioExpediente(dataInicio, dataFim);
 
         // 7. Validar conflitos de horário
-        var conflitos = agendamentoRepository.findConflitos(dataInicio, dataFim);
-        if (!conflitos.isEmpty()) {
-            throw new IllegalArgumentException("Horário indisponível. Alguém já reservou!");
-        }
+        validarConflitosHorario(dataInicio, dataFim);
 
         // 9. Criar e salvar agendamento
         Agendamento agendamento = new Agendamento();
@@ -119,7 +116,9 @@ public class AgendamentoService {
         } else {
             cliente = agendamento.getCliente();
         }
+        LocalDateTime dataInicio = dados.dataHoraInicio();
         LocalDateTime dataFinal = dados.dataHoraInicio().plusMinutes(servico.getDuracaoMinutos());
+        validacaoHorarioExpediente(dataInicio, dataFinal);
 
         var buscarAgendamento = agendamentoRepository.contarConflitosParaReagendamento(dados.dataHoraInicio(), dataFinal, id); //metodo para contar se tem algum agendamento que conflite com o reagendamento, levando em consideração o id do agendamento atual para não contar ele mesmo como conflito
 
@@ -253,25 +252,21 @@ public class AgendamentoService {
         }
     }
 
-    private void validacaoHorarioExpediente(DadosEntradaCadastroAgendamento dto, Servico servico) {
-        LocalDateTime dataHoraInicio = dto.dataHoraInicio();
+    private void validacaoHorarioExpediente(LocalDateTime dataInicio, LocalDateTime dataFim) {
 
-        LocalDate diaAgendamento = dataHoraInicio.toLocalDate(); //data do agendamento para pesquisar o dia especial
+        LocalDate diaAgendamento = dataInicio.toLocalDate(); //data do agendamento para pesquisar o dia especial
         var diaEspecialOpt = diaEspecialRepository.findByData(diaAgendamento); // pesquisa se tem um dia especial cadastrado para a data do agendamento, caso tenha ele retorna um Optional com o dia especial, caso contrário ele retorna um Optional vazio
 
         LocalDateTime limiteAbertura;
         LocalDateTime limiteFechamento;
 
-        LocalDateTime dataFim = dataHoraInicio.plusMinutes(servico.getDuracaoMinutos());
 
         if (diaEspecialOpt.isPresent()) {
             var dia = diaEspecialOpt.get();
-
             if (Boolean.TRUE.equals(dia.getDiaFolga())) {
                 throw new IllegalArgumentException("É dia de folga! Estamos fechados!");
             }
             limiteAbertura = LocalDateTime.of(diaAgendamento, dia.getHorarioAbertura());
-
             if (dia.getHorarioFechamento().isBefore(dia.getHorarioAbertura())) {
                 limiteFechamento = LocalDateTime.of(diaAgendamento.plusDays(1), dia.getHorarioFechamento());
             } else {
@@ -281,8 +276,15 @@ public class AgendamentoService {
             limiteAbertura = LocalDateTime.of(diaAgendamento, LocalTime.of(8, 0));
             limiteFechamento = LocalDateTime.of(diaAgendamento, LocalTime.of(18, 0));
         }
-        if (dataHoraInicio.isBefore(limiteAbertura) || dataFim.isAfter(limiteFechamento)) {
+        if (dataInicio.isBefore(limiteAbertura) || dataFim.isAfter(limiteFechamento)) {
             throw new IllegalArgumentException("Horário fora do expediente da barbearia!");
         }
+    }
+    private void validarConflitosHorario(LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim) {
+        var conflitos = agendamentoRepository.findConflitos(dataHoraInicio, dataHoraFim);
+        if (!conflitos.isEmpty()) {
+            throw new IllegalArgumentException("Horário indisponível. Alguém já reservou!");
+        }
+
     }
 }
