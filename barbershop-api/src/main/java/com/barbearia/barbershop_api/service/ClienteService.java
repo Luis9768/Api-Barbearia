@@ -65,7 +65,7 @@ public class ClienteService {
     }
 
     public ClienteDTO atualizar(Integer id, ClienteDTO dto, Usuario usuarioLogado) {
-        Cliente clienteAntigo = repository.findById(id).orElseThrow(() -> new RuntimeException("Cliente para atualizar não encontrado!"));
+        Cliente clienteAntigo = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente para atualizar não encontrado!"));
         boolean ehDono = clienteAntigo.getUsuario().getId().equals(usuarioLogado.getId());
         if(!ehDono){
             throw new IllegalArgumentException("Você não pode alterar os dados de outra pessoa!");
@@ -80,7 +80,7 @@ public class ClienteService {
     }
 
     public void excluirUsuarioId(Integer id, Usuario usuarioLogado) {
-        Cliente cliente = repository.findById(id).orElseThrow(() -> new RuntimeException("Cliente não encontrado!"));
+        Cliente cliente = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
 
         boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
         boolean ehDono = cliente.getUsuario().getId().equals(usuarioLogado.getId());

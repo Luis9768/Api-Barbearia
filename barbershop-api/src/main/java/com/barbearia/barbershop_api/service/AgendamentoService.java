@@ -215,7 +215,9 @@ public class AgendamentoService {
         Cliente cliente = clienteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
         validarUsuario(usuarioLogado, cliente);
         var agendamento = agendamentoRepository.findByClienteIdOrderByDataHoraInicioDesc(id);
-
+        if(agendamento.isEmpty()){
+            throw new IllegalArgumentException("Nenhum agendamento encontrado para este cliente!");
+        }
         return agendamento.stream()
                 .map(SaidaAgendamentoDTO::new)
                 .toList();

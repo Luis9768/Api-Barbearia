@@ -1,11 +1,13 @@
 package com.barbearia.barbershop_api.dto;
 
 import com.barbearia.barbershop_api.model.Servico;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 
+@JsonPropertyOrder({"nome", "preco", "descricao", "duracaoMinutos"})
 public class ServicoDTO {
 
     @NotBlank(message = "O nome é obrigatório")

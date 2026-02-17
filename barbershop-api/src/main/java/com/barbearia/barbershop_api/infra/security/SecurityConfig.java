@@ -21,6 +21,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     @Autowired
     SecurityFilter securityFilter;
+    @Autowired
+    private TratadorAcessoNegado tratadorAcessoNegado;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,6 +33,7 @@ public class SecurityConfig {
                     req.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll();// Libera o Login pra todo mundo
                     req.anyRequest().authenticated(); // O resto? Só com cadeado (Token)
                 })
+                .exceptionHandling(ex -> ex.accessDeniedHandler(tratadorAcessoNegado))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -44,4 +47,5 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(); // Diz: "Use BCrypt para criptografar as senhas"
     }
+
 }
