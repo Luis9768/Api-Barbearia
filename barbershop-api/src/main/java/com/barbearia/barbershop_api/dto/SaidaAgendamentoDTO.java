@@ -2,18 +2,22 @@ package com.barbearia.barbershop_api.dto;
 
 import com.barbearia.barbershop_api.model.Agendamento;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 
-
+@JsonPropertyOrder({"clienteId", "servicoId", "dataHoraInicio", "dataHoraFim"})
 public class SaidaAgendamentoDTO {
 
     private Integer id;
 
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+    @Schema(type = "string", example = "24/12/2026 14:30")
     private LocalDateTime dataHoraInicio;
 
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+    @Schema(type = "string", example = "24/12/2026 15:30")
     private LocalDateTime dataHoraFim;
 
     private Integer clienteId;
