@@ -45,11 +45,14 @@ public class ServicoController {
         }else {
             return ResponseEntity.notFound().build();
         }
-
-
-        //Compara se ele é nullo manda o servico filtrado por Id
-        //400 se não achar e 200 se achar
     }
+
+    @GetMapping("/buscar")
+    public ResponseEntity <List<ServicoDTO>> pesquisarPorNome(@RequestParam String nome){
+        var buscarPorNome = service.buscarPorNome(nome);
+        return ResponseEntity.ok(buscarPorNome.stream().map(ServicoDTO::new).toList());
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Servico> atualizarServico(@PathVariable Integer id, @Valid @RequestBody ServicoDTO dto) {
@@ -75,4 +78,5 @@ public class ServicoController {
         //nesse metodo como la no service ta void pq não retorna nada ele apenas busca o ID no banco
         //e se achar exclui e o ResponseEntity.noContent não retorna nada
     }
+
 }

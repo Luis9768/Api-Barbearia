@@ -1,5 +1,6 @@
 package com.barbearia.barbershop_api.controller;
 
+import com.barbearia.barbershop_api.dto.DadosEntradaReagendamento;
 import com.barbearia.barbershop_api.dto.SaidaAgendamentoDTO;
 import com.barbearia.barbershop_api.dto.DadosEntradaCadastroAgendamento;
 import com.barbearia.barbershop_api.dto.FaturamentoDTO;
@@ -46,8 +47,8 @@ public class AgendamentoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(dtoSaida);
     }
     @GetMapping("/listarAgendamentos")
-    public ResponseEntity<List<SaidaAgendamentoDTO>> listarAgendamentos(@RequestParam(required = false) LocalDate data, @AuthenticationPrincipal Cliente cliente){
-        return ResponseEntity.ok(service.listarAgendamentos(data, cliente));
+    public ResponseEntity<List<SaidaAgendamentoDTO>> listarAgendamentos(@RequestParam(required = false) LocalDate data, @AuthenticationPrincipal Usuario usuarioLogado){
+        return ResponseEntity.ok(service.listarAgendamentos(data, usuarioLogado));
     }
     @GetMapping("/listarHorariosDisponiveis")
     public ResponseEntity<List<LocalTime>> listarHorariosDisponiveis(@RequestParam LocalDate data, @RequestParam Integer servicoId ){
@@ -79,7 +80,7 @@ public class AgendamentoController {
     }
     @PutMapping("/{id}")
     @Transactional
-    public ResponseEntity<SaidaAgendamentoDTO> reagendamento(@PathVariable Integer id, @RequestBody @Valid DadosEntradaCadastroAgendamento dados, @AuthenticationPrincipal Usuario usuarioLogado){
+    public ResponseEntity<SaidaAgendamentoDTO> reagendamento(@PathVariable Integer id, @RequestBody @Valid DadosEntradaReagendamento dados, @AuthenticationPrincipal Usuario usuarioLogado){
         Agendamento agendamentoAtualizado = service.reagendar(id, dados, usuarioLogado);
         return ResponseEntity.ok(new SaidaAgendamentoDTO(agendamentoAtualizado));
     }

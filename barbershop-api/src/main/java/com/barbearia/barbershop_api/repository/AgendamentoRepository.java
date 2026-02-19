@@ -18,12 +18,13 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Intege
                             @Param("fim") LocalDateTime fim);
 
     @Query("""
-    SELECT SUM(s.preco) 
-    FROM Agendamento a 
-    JOIN a.servico s 
-    WHERE a.dataHoraInicio BETWEEN :inicio AND :fim 
-    AND a.statusAgendamento = :status
-""") Double somarFaturamentoPorStatus(LocalDateTime inicio, LocalDateTime fim, StatusAgendamento status);
+                SELECT SUM(s.preco) 
+                FROM Agendamento a 
+                JOIN a.servico s 
+                WHERE a.dataHoraInicio BETWEEN :inicio AND :fim 
+                AND a.statusAgendamento = :status
+            """)
+    Double somarFaturamentoPorStatus(LocalDateTime inicio, LocalDateTime fim, StatusAgendamento status);
 
     List<Agendamento> findByDataHoraInicioBetween(LocalDateTime inicio, LocalDateTime fim);
 
@@ -43,4 +44,8 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Intege
     List<ItemRankingDTO> findRankingServicos();
 
     List<Agendamento> findByClienteAndDataHoraInicioBetween(Cliente cliente, LocalDateTime inicio, LocalDateTime fim);
+
+    @Query(value = "SELECT * FROM agendamento WHERE cliente_id = :clienteId", nativeQuery = true)
+    List<Agendamento> buscarHistoricoCompleto(Integer clienteId);
+// Resultado: Traz TUDO do banco (agendados, cancelados, concluídos), furando o bloqueio da sua classe.
 }

@@ -36,14 +36,18 @@ public class Agendamento {
     private Servico servico;
 
     private Boolean ativo = true;
-
+    @Enumerated(EnumType.STRING)
     private StatusAgendamento statusAgendamento;
 
     @PrePersist
+    @PreUpdate
     public void prePersist() {
-        if (this.ativo == null) {
+       //serve para ele sempre iniciar como true
+        if(StatusAgendamento.AGENDADO.equals(this.statusAgendamento)){
             this.ativo = true;
-        }//serve para ele sempre iniciar como true
+        }else{
+            this.ativo = false;
+        }
     }
 
     public Agendamento() {

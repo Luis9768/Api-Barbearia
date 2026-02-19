@@ -1,12 +1,13 @@
 package com.barbearia.barbershop_api.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
-
+@JsonPropertyOrder({"clienteId", "servicoId", "dataHoraInicio", "dataHoraFim"})
 public record DadosEntradaCadastroAgendamento(
         @NotNull(message = "A data e hora são obrigatórias!")
         @Future(message = "A data do agendamento deve ser no futuro!")

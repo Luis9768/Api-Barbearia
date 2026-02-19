@@ -59,5 +59,8 @@ public class ServicoService {
         }
         repository.deleteById(id);
     }
+    public List<Servico> buscarPorNome(String nome){
+        return repository.findByNomeContainingIgnoreCase(nome);
+    }
 
 }
