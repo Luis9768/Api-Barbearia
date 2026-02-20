@@ -102,6 +102,13 @@ public class ClienteService {
 
         repository.save(cliente);
     }
+    public List<Cliente> pesquisarPorNome(String nome, Usuario usuarioLogado){
+        if(usuarioLogado.getPerfil() == Perfil.ADMIN) {
+            return repository.findByNomeContainingIgnoreCase(nome);
+        }else {
+            throw new IllegalArgumentException("Você não tem permissão para pesquisar usuários!");
+        }
+    }
 
 
 

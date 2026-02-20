@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,13 @@ public class ClienteController {
     @GetMapping
     public ResponseEntity<List<ClienteDTO>> listarUsuarios(@AuthenticationPrincipal Usuario usuarioLogado) {
         return ResponseEntity.ok(service.listarUsuarios(usuarioLogado));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/buscar")
+    public ResponseEntity<List<ClienteDTO>> buscarClienteNome(@RequestParam String name, @AuthenticationPrincipal() Usuario usuarioLogado){
+        var buscarNome = service.pesquisarPorNome(name,  usuarioLogado);
+        return ResponseEntity.ok(buscarNome.stream().map(ClienteDTO::new).toList());
     }
 
     @PutMapping("/{id}")
