@@ -37,6 +37,8 @@ public class AgendamentoService {
     public Agendamento realizarAgendamento(DadosEntradaCadastroAgendamento dto, Usuario usuarioLogado) {
 
         validarDataPassado(dto.dataHoraInicio());
+        LocalDate validacao = dto.dataHoraInicio().toLocalDate();
+        validarDatasEntrada(validacao);
 
         Cliente cliente;
         if (usuarioLogado.getPerfil() == Perfil.ADMIN) {
@@ -103,6 +105,8 @@ public class AgendamentoService {
 
     @Transactional
     public Agendamento reagendar(Integer id, DadosEntradaReagendamento dados, Usuario usuarioLogado) {
+        LocalDate validacao = dados.dataHoraInicio().toLocalDate();
+        validarDatasEntrada(validacao);
 
         Agendamento agendamento = agendamentoRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Agendamento não encontrado")); //busca o id
 
@@ -131,6 +135,8 @@ public class AgendamentoService {
     }
 
     public List<LocalTime> listarHorariosDisponiveis(LocalDate data, Integer servicoId) {
+        validarDatasEntrada(data);
+
         var duracaoMinutos = servicoRepository.findById(servicoId); // pesquisar servico e guardar numa variavel
         var diaEspecial = diaEspecialRepository.findByData(data); // pesquisar ver se é uma data especial e guardar numa variavel
 
@@ -181,7 +187,9 @@ public class AgendamentoService {
     }
 
     public List<SaidaAgendamentoDTO> listarAgendamentos(LocalDate data,Usuario usuarioLogado) {
-
+        if (data == null) {
+            data = LocalDate.now(); // Se o cliente não mandar data, assume que ele quer ver os de hoje!
+        }
         Cliente cliente = clienteRepository.findByUsuarioId(usuarioLogado.getId()).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!")); //pesquisa o cliente logado para garantir que ele existe no banco de dados, caso contrário lança uma exceção
         //metodo listar agendamentos caso a data esteja vazia
         LocalDateTime inicio = data.atStartOfDay();
@@ -283,6 +291,13 @@ public class AgendamentoService {
             throw new IllegalArgumentException("Horário indisponível. Alguém já reservou!");
         }
 
+    }
+    private void validarDatasEntrada(LocalDate dataSolicitada){
+        LocalDate hoje = LocalDate.now();
+        LocalDate limiteMaximo = LocalDate.now().plusDays(30);
+        if(dataSolicitada.isBefore(hoje) || dataSolicitada.isAfter(limiteMaximo)){
+            throw new IllegalArgumentException("Data inválida! Selecione outra.");
+        }
     }
 
 }

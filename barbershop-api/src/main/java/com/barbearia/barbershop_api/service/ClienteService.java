@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ClienteService {
@@ -33,6 +34,7 @@ public class ClienteService {
         if (repository.findByEmail(dto.getEmail()).isPresent()) {
             throw new IllegalArgumentException("E-mail já cadastrado!");
         }
+
         Usuario usuario = new Usuario();
         usuario.setLogin(dto.getEmail());
         usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
@@ -65,6 +67,14 @@ public class ClienteService {
     }
 
     public ClienteDTO atualizar(Integer id, ClienteDTO dto, Usuario usuarioLogado) {
+
+        if(dto.getCpf() != null){
+            Optional<Cliente> existeCpf = repository.findByCpf(dto.getCpf());
+            if(existeCpf.isPresent() && !existeCpf.get().getId().equals(usuarioLogado.getId())){
+                throw new IllegalArgumentException("Erro: Este CPF já pertence a outro cliente no sistema!");
+            }
+        }
+
         Cliente clienteAntigo = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente para atualizar não encontrado!"));
         boolean ehDono = clienteAntigo.getUsuario().getId().equals(usuarioLogado.getId());
         if(!ehDono){
