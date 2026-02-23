@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/cliente")
@@ -33,11 +34,18 @@ public class ClienteController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/buscar")
-    public ResponseEntity<List<ClienteDTO>> buscarClienteNome(@RequestParam String name, @AuthenticationPrincipal() Usuario usuarioLogado){
+    @GetMapping("/buscarPorNome")
+    public ResponseEntity<List<ClienteDTO>> buscarClienteNome(@RequestParam String name, @AuthenticationPrincipal Usuario usuarioLogado){
         var buscarNome = service.pesquisarPorNome(name,  usuarioLogado);
         return ResponseEntity.ok(buscarNome.stream().map(ClienteDTO::new).toList());
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/buscarPorCpf")
+    public ResponseEntity<Optional<Cliente>> buscarPorCpf(@RequestParam String cpf, @AuthenticationPrincipal Usuario usuarioLogado){
+        var buscarCpf = service.pesquisarPorCpf(cpf,usuarioLogado);
+        return ResponseEntity.ok(buscarCpf);
+    }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<ClienteDTO> atualizarDados(@PathVariable Integer id, @Valid @RequestBody ClienteDTO dto, @AuthenticationPrincipal Usuario usuarioLogado) {

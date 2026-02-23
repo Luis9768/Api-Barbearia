@@ -58,7 +58,7 @@ public class ClienteService {
 
     public List<ClienteDTO> listarUsuarios(Usuario usuarioLogado) {
         boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
-        if(!ehAdmin){
+        if (!ehAdmin) {
             throw new IllegalArgumentException("Você não tem permissão para ver os usuários!");
         }
         return repository.findAll().stream()
@@ -68,16 +68,16 @@ public class ClienteService {
 
     public ClienteDTO atualizar(Integer id, ClienteDTO dto, Usuario usuarioLogado) {
 
-        if(dto.getCpf() != null){
+        if (dto.getCpf() != null) {
             Optional<Cliente> existeCpf = repository.findByCpf(dto.getCpf());
-            if(existeCpf.isPresent() && !existeCpf.get().getId().equals(usuarioLogado.getId())){
+            if (existeCpf.isPresent() && !existeCpf.get().getId().equals(usuarioLogado.getId())) {
                 throw new IllegalArgumentException("Erro: Este CPF já pertence a outro cliente no sistema!");
             }
         }
 
         Cliente clienteAntigo = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente para atualizar não encontrado!"));
         boolean ehDono = clienteAntigo.getUsuario().getId().equals(usuarioLogado.getId());
-        if(!ehDono){
+        if (!ehDono) {
             throw new IllegalArgumentException("Você não pode alterar os dados de outra pessoa!");
         }
         clienteAntigo.setNome(dto.getNome());
@@ -94,7 +94,7 @@ public class ClienteService {
 
         boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
         boolean ehDono = cliente.getUsuario().getId().equals(usuarioLogado.getId());
-        if(!ehAdmin && !ehDono){
+        if (!ehAdmin && !ehDono) {
             throw new IllegalArgumentException("Você não tem permissão para deletar este usuário!");
         }
 
@@ -102,14 +102,24 @@ public class ClienteService {
 
         repository.save(cliente);
     }
-    public List<Cliente> pesquisarPorNome(String nome, Usuario usuarioLogado){
-        if(usuarioLogado.getPerfil() == Perfil.ADMIN) {
+
+    public List<Cliente> pesquisarPorNome(String nome, Usuario usuarioLogado) {
+        if (usuarioLogado.getPerfil() == Perfil.ADMIN) {
             return repository.findByNomeContainingIgnoreCase(nome);
-        }else {
+        } else {
             throw new IllegalArgumentException("Você não tem permissão para pesquisar usuários!");
         }
     }
 
-
-
+    public Optional<Cliente> pesquisarPorCpf(String cpf, Usuario usuarioLogado) {
+        if (usuarioLogado.getPerfil() == Perfil.ADMIN) {
+            return repository.findByCpf(cpf);
+        } else {
+            throw new IllegalArgumentException("Você não tem permissão para pesquisar usuários!");
+        }
+    }
 }
+
+
+
+
