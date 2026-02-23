@@ -210,7 +210,12 @@ public class AgendamentoService {
     }
 
     public Double calcularFaturamento(LocalDate data, Usuario usuarioLogado) {
-        validarUsuario(usuarioLogado, null);
+        if(usuarioLogado.getPerfil() != Perfil.ADMIN){
+            throw new IllegalArgumentException("Você não tem permissão para acessar essa informação!");
+        }
+        if(data == null){
+            data = LocalDate.now();
+        }
         validarDataFuturo(data);
         var inicio = data.atStartOfDay();
         var fim = data.atTime(23, 59, 59);

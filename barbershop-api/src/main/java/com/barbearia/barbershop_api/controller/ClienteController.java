@@ -39,13 +39,6 @@ public class ClienteController {
         var buscarNome = service.pesquisarPorNome(name,  usuarioLogado);
         return ResponseEntity.ok(buscarNome.stream().map(ClienteDTO::new).toList());
     }
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/buscarPorCpf")
-    public ResponseEntity<Optional<Cliente>> buscarPorCpf(@RequestParam String cpf, @AuthenticationPrincipal Usuario usuarioLogado){
-        var buscarCpf = service.pesquisarPorCpf(cpf,usuarioLogado);
-        return ResponseEntity.ok(buscarCpf);
-    }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<ClienteDTO> atualizarDados(@PathVariable Integer id, @Valid @RequestBody ClienteDTO dto, @AuthenticationPrincipal Usuario usuarioLogado) {
@@ -61,5 +54,13 @@ public class ClienteController {
         service.excluirUsuarioId(id, usuarioLogado);
         return ResponseEntity.noContent().build();
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/buscarPorEmail")
+    public ResponseEntity<Optional<ClienteDTO>> buscarPorEmail(@RequestParam String email,@AuthenticationPrincipal Usuario usuarioLogado){
+        var buscarEmail = service.pesquisarPorEmail(email,usuarioLogado);
+        return ResponseEntity.ok(buscarEmail);
+    }
+
 
 }

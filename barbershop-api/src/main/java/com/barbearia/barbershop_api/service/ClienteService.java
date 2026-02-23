@@ -110,11 +110,10 @@ public class ClienteService {
             throw new IllegalArgumentException("Você não tem permissão para pesquisar usuários!");
         }
     }
-
-    public Optional<Cliente> pesquisarPorCpf(String cpf, Usuario usuarioLogado) {
-        if (usuarioLogado.getPerfil() == Perfil.ADMIN) {
-            return repository.findByCpf(cpf);
-        } else {
+    public Optional<ClienteDTO> pesquisarPorEmail(String email, Usuario usuarioLogado){
+        if(usuarioLogado.getPerfil() == Perfil.ADMIN){
+            return repository.findByEmail(email).map(ClienteDTO::new);
+        }else {
             throw new IllegalArgumentException("Você não tem permissão para pesquisar usuários!");
         }
     }

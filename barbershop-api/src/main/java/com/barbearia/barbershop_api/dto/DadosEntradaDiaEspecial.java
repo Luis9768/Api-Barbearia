@@ -21,7 +21,7 @@ public record DadosEntradaDiaEspecial(
 
         @NotNull
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
-        @Schema(type = "string", example = "03:00")
+        @Schema(type = "string", example = "17:00")
         LocalTime horaFechamento,
 
         String descricao,

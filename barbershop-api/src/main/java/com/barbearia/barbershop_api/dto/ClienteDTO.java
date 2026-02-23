@@ -2,6 +2,7 @@ package com.barbearia.barbershop_api.dto;
 
 import com.barbearia.barbershop_api.model.Cliente;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
+@JsonPropertyOrder({"nome","contato","cpf","email","dataNascimento"})
 public class ClienteDTO {
 
 
