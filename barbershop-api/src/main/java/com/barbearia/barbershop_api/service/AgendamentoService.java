@@ -7,6 +7,7 @@ import com.barbearia.barbershop_api.model.*;
 import com.barbearia.barbershop_api.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -186,7 +187,7 @@ public class AgendamentoService {
         return horariosLivres; // e retorna os horarios livres
     }
 
-    public List<SaidaAgendamentoDTO> listarAgendamentos(LocalDate data,Usuario usuarioLogado) {
+    public List<SaidaAgendamentoDTO> listarAgendamentos(LocalDate data, Usuario usuarioLogado) {
         if (data == null) {
             data = LocalDate.now(); // Se o cliente não mandar data, assume que ele quer ver os de hoje!
         }
@@ -210,10 +211,10 @@ public class AgendamentoService {
     }
 
     public Double calcularFaturamento(LocalDate data, Usuario usuarioLogado) {
-        if(usuarioLogado.getPerfil() != Perfil.ADMIN){
+        if (usuarioLogado.getPerfil() != Perfil.ADMIN) {
             throw new IllegalArgumentException("Você não tem permissão para acessar essa informação!");
         }
-        if(data == null){
+        if (data == null) {
             data = LocalDate.now();
         }
         validarDataFuturo(data);
@@ -297,12 +298,21 @@ public class AgendamentoService {
         }
 
     }
-    private void validarDatasEntrada(LocalDate dataSolicitada){
+
+    private void validarDatasEntrada(LocalDate dataSolicitada) {
         LocalDate hoje = LocalDate.now();
         LocalDate limiteMaximo = LocalDate.now().plusDays(30);
-        if(dataSolicitada.isBefore(hoje) || dataSolicitada.isAfter(limiteMaximo)){
+        if (dataSolicitada.isBefore(hoje) || dataSolicitada.isAfter(limiteMaximo)) {
             throw new IllegalArgumentException("Data inválida! Selecione outra.");
         }
     }
 
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    public void atualizarStatusAgendamentosPassados() {
+        LocalDateTime agora = LocalDateTime.now();
+        List<Agendamento> agendamentosAtrasados = agendamentoRepository.findByStatusAgendamentoAndDataHoraFimBefore(StatusAgendamento.AGENDADO, agora);
+        agendamentosAtrasados.forEach(agendamento -> agendamento.setStatusAgendamento(StatusAgendamento.AGUARDANDO_PAGAMENTO));
+        agendamentoRepository.saveAll(agendamentosAtrasados);
+    }
 }

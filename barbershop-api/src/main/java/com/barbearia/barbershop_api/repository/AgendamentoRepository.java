@@ -47,5 +47,7 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Intege
 
     @Query(value = "SELECT * FROM agendamento WHERE cliente_id = :clienteId", nativeQuery = true)
     List<Agendamento> buscarHistoricoCompleto(Integer clienteId);
-// Resultado: Traz TUDO do banco (agendados, cancelados, concluídos), furando o bloqueio da sua classe.
+
+    // Resultado: Traz TUDO do banco (agendados, cancelados, concluídos), furando o bloqueio da sua classe.
+    List<Agendamento> findByStatusAgendamentoAndDataHoraFimBefore(StatusAgendamento status, LocalDateTime agora);
 }

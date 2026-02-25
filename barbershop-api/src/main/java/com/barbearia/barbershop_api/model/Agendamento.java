@@ -37,6 +37,7 @@ public class Agendamento {
 
     private Boolean ativo = true;
     @Enumerated(EnumType.STRING)
+    @Column(length = 30)
     private StatusAgendamento statusAgendamento;
 
     @PrePersist
