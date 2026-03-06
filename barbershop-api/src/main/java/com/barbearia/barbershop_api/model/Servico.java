@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
 
@@ -13,6 +14,7 @@ import java.math.BigDecimal;
 @Table(name = "tb_servico")
 @SQLRestriction("ativo = true")
 @SQLDelete(sql = "UPDATE tb_servico SET ativo = false WHERE id = ?")
+@Audited
 public class Servico {
 
     @Id

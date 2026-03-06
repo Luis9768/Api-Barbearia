@@ -1,6 +1,7 @@
 package com.barbearia.barbershop_api.controller;
 
 import com.barbearia.barbershop_api.dto.DadosEntradaDiaEspecial;
+import com.barbearia.barbershop_api.dto.DadosEntradaReagendamento;
 import com.barbearia.barbershop_api.dto.SaidaDiaEspecialDTO;
 import com.barbearia.barbershop_api.model.DiaEspecial;
 import com.barbearia.barbershop_api.model.Usuario;
@@ -23,8 +24,8 @@ public class DiaEspecialController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<DiaEspecial> criarDataEspecial(@RequestBody DadosEntradaDiaEspecial dto, @AuthenticationPrincipal Usuario usuarioLogado){
-        DiaEspecial diaEspecial = service.cadastro(dto,usuarioLogado);
+    public ResponseEntity<SaidaDiaEspecialDTO> criarDataEspecial(@RequestBody DadosEntradaDiaEspecial dto, @AuthenticationPrincipal Usuario usuarioLogado){
+         SaidaDiaEspecialDTO diaEspecial = service.cadastro(dto,usuarioLogado);
         return ResponseEntity.status(HttpStatus.CREATED).body(diaEspecial);
     }//ele cria um dia especial na agenda no qual não abrirá
 
@@ -33,6 +34,27 @@ public class DiaEspecialController {
         var diaEspecial = service.listarDiaEspecial();
         return ResponseEntity.ok(diaEspecial.stream().map(SaidaDiaEspecialDTO::new).toList());
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<DiaEspecial> buscarPorId(@RequestParam int id){
+        var buscarDia = service.buscarPorId(id);
+        return ResponseEntity.ok(buscarDia);
+    }
+
+    @PutMapping("/atualizarDiaEspecial")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SaidaDiaEspecialDTO> atualizarDiaEspecial(@RequestParam int id, @RequestBody DadosEntradaDiaEspecial dados, @AuthenticationPrincipal Usuario usuarioLogado){
+        SaidaDiaEspecialDTO diaEspecial = service.atualizarDiaEspecial(id,dados,usuarioLogado);
+        return ResponseEntity.ok(diaEspecial);
+    }
+    @DeleteMapping("/deletarDiaEspecial")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> excluirDiaEspecial(@RequestParam int id,@AuthenticationPrincipal Usuario usuarioLogado){
+        service.deletarDiaEspecial(id,usuarioLogado);
+        return ResponseEntity.noContent().build();
+    }
+
+
+
 
 
 

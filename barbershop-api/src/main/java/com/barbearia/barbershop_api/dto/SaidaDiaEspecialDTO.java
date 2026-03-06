@@ -9,7 +9,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-
+@JsonPropertyOrder({"descricao","data","horarioAbertura","horarioFechamento", "mensagem"})
 public record SaidaDiaEspecialDTO(
         LocalDate data,
         LocalTime horarioAbertura,
