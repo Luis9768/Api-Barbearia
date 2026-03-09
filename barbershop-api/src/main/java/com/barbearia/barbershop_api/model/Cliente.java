@@ -3,8 +3,7 @@ package com.barbearia.barbershop_api.model;
 import com.barbearia.barbershop_api.dto.ClienteDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -14,6 +13,9 @@ import java.time.LocalDate;
 @Table(name = "clientes")
 @SQLRestriction("ativo = true")
 @SQLDelete(sql = "UPDATE clientes SET ativo = false WHERE id = ?")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Cliente {
     @Setter
     @Getter
@@ -53,18 +55,6 @@ public class Cliente {
     @Setter
     @Getter
     private Boolean ativo = true;
-
-
-    public Cliente() {
-    }
-
-    public Cliente(String nome, String cpf, String contato, String email, LocalDate dataNascimento) {
-        this.nome = nome;
-        this.cpf = cpf;
-        this.contato = contato;
-        this.email = email;
-        this.dataNascimento = dataNascimento;
-    }
 
 
 }
