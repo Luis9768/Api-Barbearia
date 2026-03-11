@@ -1,6 +1,7 @@
 package com.barbearia.barbershop_api.service;
 
-import com.barbearia.barbershop_api.dto.BarbeiroDTO;
+import com.barbearia.barbershop_api.dto.BarbeiroDto;
+import com.barbearia.barbershop_api.dto.DadosEntradaAtualizarBarbeiro;
 import com.barbearia.barbershop_api.dto.DadosEntradaCadastroBarbeiro;
 import com.barbearia.barbershop_api.model.Barbeiro;
 import com.barbearia.barbershop_api.model.Perfil;
@@ -8,9 +9,13 @@ import com.barbearia.barbershop_api.model.Usuario;
 import com.barbearia.barbershop_api.repository.BarbeiroRepository;
 import com.barbearia.barbershop_api.repository.UsuarioLoginRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class BarbeiroService {
@@ -22,30 +27,85 @@ public class BarbeiroService {
     private PasswordEncoder passwordEncoder;
 
     @Transactional
-    public BarbeiroDTO adicionar(DadosEntradaCadastroBarbeiro dto){
-        if(repository.existsByEmail(dto.email())){
+    public BarbeiroDto adicionar(DadosEntradaCadastroBarbeiro barbeiroDto, Usuario usuarioLogado) {
+        if (usuarioLogado.getPerfil() != Perfil.ADMIN) {
+            throw new IllegalArgumentException("Você não tem permissão para realizar esta ação!");
+        }
+        if (repository.existsByEmail(barbeiroDto.email())) {
             throw new IllegalArgumentException("Email já cadastrado!");
         }
+
         Usuario usuario = new Usuario();
-        usuario.setLogin(dto.email());
-        usuario.setSenha(passwordEncoder.encode(dto.senha()));
+        usuario.setLogin(barbeiroDto.email());
+        usuario.setSenha(passwordEncoder.encode(barbeiroDto.senha()));
+        usuario.setPerfil(Perfil.ADMIN);
         Usuario usuarioSalvo = usuarioLoginRepository.save(usuario);
 
         Barbeiro barbeiro = new Barbeiro();
-        barbeiro.setNome(dto.nome());
-        barbeiro.setContato(dto.contato());
-        barbeiro.setEmail(dto.email());
-        barbeiro.setSenha(dto.senha());
+        barbeiro.setUsuario(usuario);
+        barbeiro.setNome(barbeiroDto.nome());
+        barbeiro.setContato(barbeiroDto.contato());
+        barbeiro.setEmail(barbeiroDto.email());
         barbeiro.setAtivo(true);
-
-        barbeiro.setUsuario(usuarioSalvo);
-
-        usuario.setPerfil(Perfil.ADMIN);
         repository.save(barbeiro);
 
-        return new DadosEntradaCadastroBarbeiro(barbeiro);
-
-
+        return new BarbeiroDto(barbeiro);
     }
+
+    @Transactional
+    public BarbeiroDto atualizar(int id, DadosEntradaAtualizarBarbeiro dto, Usuario usuarioLogado) {
+        Barbeiro barbeiro = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Barbeiro não encontrado!"));
+        boolean ehDono = barbeiro.getUsuario().getId().equals(usuarioLogado.getId());
+        if (!ehDono) {
+            throw new IllegalArgumentException("Você não pode alterar os dados de outro Admin!");
+        }
+        if (dto.nome() != null && !dto.nome().isBlank()) {
+            barbeiro.setNome(dto.nome());
+        }
+        if (dto.contato() != null && !dto.contato().isBlank()) {
+            barbeiro.setContato(dto.contato());
+        }
+        if (dto.email() != null && !dto.email().isBlank()) {
+            barbeiro.setEmail(dto.email());
+            barbeiro.getUsuario().setLogin(dto.email());
+        }
+        if (dto.senha() != null && !dto.senha().isBlank()) {
+            barbeiro.setSenha(passwordEncoder.encode(dto.senha()));
+            barbeiro.getUsuario().setSenha(passwordEncoder.encode(dto.senha()));
+        }
+        repository.save(barbeiro);
+        return new BarbeiroDto(barbeiro);
+    }
+
+    public List<BarbeiroDto> listarBarbeiros(Usuario usuarioLogado) {
+        if (usuarioLogado.getPerfil() != Perfil.ADMIN) {
+            throw new IllegalArgumentException("Você não tem permissão para realizar esta ação!");
+        }
+        List<BarbeiroDto> lista = repository.findAll().stream()
+                .map(BarbeiroDto::new)
+                .toList();
+        return lista;
+    }
+
+    public void deletar(int id, Usuario usuarioLogado) {
+        boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
+        Barbeiro barbeiro = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Barbeiro não encontrado!"));
+        boolean ehDono = barbeiro.getUsuario().getId().equals(usuarioLogado.getId());
+        if (!ehAdmin && !ehDono) {
+            throw new IllegalArgumentException("Você não tem permissão para deletar este usuário!");
+        }
+        barbeiro.setAtivo(false);
+        repository.save(barbeiro);
+    }
+    public BarbeiroDto buscarPorId(int id, Usuario usuarioLogado){
+        boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
+        Barbeiro barbeiro = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Barbeiro não encontrado!"));
+        boolean ehDono = barbeiro.getUsuario().getId().equals(usuarioLogado.getId());
+        if (!ehAdmin && !ehDono) {
+            throw new IllegalArgumentException("Você não tem permissão para realizar esta ação!");
+        }
+        return new BarbeiroDto(barbeiro);
+    }
+
 
 }

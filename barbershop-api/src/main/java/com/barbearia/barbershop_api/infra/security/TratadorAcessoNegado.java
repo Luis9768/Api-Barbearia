@@ -21,4 +21,5 @@ public class TratadorAcessoNegado implements org.springframework.security.web.ac
         response.getWriter().write(jsonResponse);
 
     }
+    
 }

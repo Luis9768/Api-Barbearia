@@ -48,4 +48,5 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(); // Diz: "Use BCrypt para criptografar as senhas"
     }
 
+
 }
