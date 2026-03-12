@@ -26,7 +26,7 @@ public class ClienteController {
     public ResponseEntity<ClienteDTO> cadastrarUsuario(@Valid @RequestBody ClienteDTO dto) {
         ClienteDTO usuario = service.cadastroUsuario(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
-    }//cadastro de usuario, recebe requisições HTTP Json e manda para as regras de negocio service.
+    }
 
     @GetMapping
     public ResponseEntity<List<ClienteDTO>> listarUsuarios(@AuthenticationPrincipal Usuario usuarioLogado) {

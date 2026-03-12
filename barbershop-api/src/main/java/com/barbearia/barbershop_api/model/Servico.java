@@ -2,7 +2,9 @@ package com.barbearia.barbershop_api.model;
 
 import com.barbearia.barbershop_api.dto.ServicoDTO;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.envers.Audited;
@@ -33,6 +35,14 @@ public class Servico {
     private Integer duracaoMinutos; //coluna de duração de minutos do serviço
 
     private Boolean ativo;
+
+    @Lob
+    @Column(columnDefinition = "MEDIUMBLOB")
+    private byte[] dadosImagem;
+
+    private String tipoImagem;
+
+
     //nullable = não pode ser vazia.
     //lenght = tamanho.
     //@Column = coluna
@@ -46,6 +56,7 @@ public class Servico {
         this.duracaoMinutos = duracaoMinutos;
         this.preco = preco;
     }
+
     public Servico(ServicoDTO dados) {
         this.ativo = true;
         this.nome = dados.getNome();

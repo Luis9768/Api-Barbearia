@@ -16,7 +16,9 @@ import org.hibernate.envers.RevisionType;
 import org.hibernate.envers.query.AuditEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -34,20 +36,30 @@ public class ServicoService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public Servico cadastro(Servico servico) {
+    public Servico cadastro(Servico servico, MultipartFile arquivo) {
         if (servico.getDuracaoMinutos() == null || servico.getDuracaoMinutos() < 0) {
             throw new IllegalArgumentException("Tempo de duração inválido.");
         }
         if (servico.getPreco() == null || servico.getPreco().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Preço inválido.");
         }
+        if (arquivo != null && !arquivo.isEmpty()) {
+            try {
+                servico.setTipoImagem(arquivo.getContentType());
+                servico.setDadosImagem(arquivo.getBytes());
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Erro ao processar a imagem do serviço!");
+            }
+        }
         return repository.save(servico);
-        //metodo para comparar se o valor é menor que 0 com o compareTo e caso não caia dentro do IF ele salva.
     }
+
 
     public List<Servico> listarTudo() {
         return repository.findAll();
     }//metodo que lista todos os servicos da barbearia
+
+
 
     public Servico buscarPorId(Integer id) {
         return repository.findById(id).orElse(null);
@@ -78,14 +90,15 @@ public class ServicoService {
     public List<Servico> buscarPorNome(String nome) {
         return repository.findByNomeContainingIgnoreCase(nome);
     }
+
     @Transactional
-    public List<HIstoricoServicoDTO> buscarHistorico(Long id, Usuario usuarioLogado){
+    public List<HIstoricoServicoDTO> buscarHistorico(Long id, Usuario usuarioLogado) {
         if (usuarioLogado.getPerfil() != Perfil.ADMIN) {
             throw new IllegalArgumentException("Você não tem permissão para realizar esta ação!");
         }
         AuditReader auditReader = AuditReaderFactory.get(entityManager);
         List<Object[]> historicoParaTransformar = auditReader.createQuery()
-                .forRevisionsOfEntity(Servico.class,false,true)
+                .forRevisionsOfEntity(Servico.class, false, true)
                 .add(AuditEntity.id().eq(id))
                 .getResultList();
         return historicoParaTransformar.stream().map(array -> {

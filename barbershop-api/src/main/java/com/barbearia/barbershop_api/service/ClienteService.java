@@ -67,39 +67,46 @@ public class ClienteService {
     }
 
     public ClienteDTO atualizar(Integer id, ClienteDTO dto, Usuario usuarioLogado) {
-
-        if (dto.getCpf() != null) {
-            Optional<Cliente> existeCpf = repository.findByCpf(dto.getCpf());
-            if (existeCpf.isPresent() && !existeCpf.get().getId().equals(usuarioLogado.getId())) {
-                throw new IllegalArgumentException("Erro: Este CPF já pertence a outro cliente no sistema!");
-            }
-        }
-
         Cliente clienteAntigo = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente para atualizar não encontrado!"));
         boolean ehDono = clienteAntigo.getUsuario().getId().equals(usuarioLogado.getId());
         if (!ehDono) {
             throw new IllegalArgumentException("Você não pode alterar os dados de outra pessoa!");
         }
-        clienteAntigo.setNome(dto.getNome());
-        clienteAntigo.setContato(dto.getContato());
-        clienteAntigo.setCpf(dto.getCpf());
-        clienteAntigo.setEmail(dto.getEmail());
-        clienteAntigo.setDataNascimento(dto.getDataNascimento());
+        if (dto.getCpf() != null) {
+            Optional<Cliente> existeCpf = repository.findByCpf(dto.getCpf());
+            if (existeCpf.isPresent() && !existeCpf.get().getId().equals(clienteAntigo.getId())) {
+                throw new IllegalArgumentException("Erro: Este CPF já pertence a outro cliente no sistema!");
+            }
+        }
+        if(dto.getNome() != null && !dto.getNome().isBlank()) {
+            clienteAntigo.setNome(dto.getNome());
+        }
+        if(dto.getContato() !=null && !dto.getContato().isBlank()) {
+            clienteAntigo.setContato(dto.getContato());
+        }
+        if (dto.getCpf() != null && !dto.getCpf().isBlank()) {
+            clienteAntigo.setCpf(dto.getCpf());
+        }
+        if(dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            clienteAntigo.setEmail(dto.getEmail());
+            clienteAntigo.getUsuario().setLogin(dto.getEmail());
+        }
+        if(dto.getDataNascimento() != null) {
+            clienteAntigo.setDataNascimento(dto.getDataNascimento());
+        }
         clienteAntigo = repository.save(clienteAntigo);
+
         return new ClienteDTO(clienteAntigo);
     }
 
     public void excluirUsuarioId(Integer id, Usuario usuarioLogado) {
         Cliente cliente = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
-
         boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
         boolean ehDono = cliente.getUsuario().getId().equals(usuarioLogado.getId());
         if (!ehAdmin && !ehDono) {
             throw new IllegalArgumentException("Você não tem permissão para deletar este usuário!");
         }
-
         cliente.setAtivo(false);
-
         repository.save(cliente);
     }
 

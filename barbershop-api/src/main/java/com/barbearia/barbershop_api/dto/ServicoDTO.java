@@ -4,6 +4,7 @@ import com.barbearia.barbershop_api.model.Servico;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 
@@ -20,6 +21,9 @@ public class ServicoDTO {
 
     @Positive(message = "Tempo não pode ser negativo")
     private Integer duracaoMinutos; //coluna de duração de minutos do serviço
+
+    @Positive(message = "Imagem é obrigatória!")
+    private MultipartFile arquivo;
 
     //nullable = não pode ser vazia.
 

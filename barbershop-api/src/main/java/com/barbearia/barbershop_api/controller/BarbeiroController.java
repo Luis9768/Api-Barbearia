@@ -38,9 +38,8 @@ public class BarbeiroController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<BarbeiroDto> listarPorID(@RequestParam int id, @AuthenticationPrincipal Usuario usuarioLogado){
-        var a = service.buscarPorId(id, usuarioLogado);
-        return ResponseEntity.ok(a);
-
+        var listarId = service.buscarPorId(id, usuarioLogado);
+        return ResponseEntity.ok(listarId);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@RequestParam int id, @AuthenticationPrincipal Usuario usuarioLogado){

@@ -6,9 +6,11 @@ import com.barbearia.barbershop_api.service.ServicoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,11 +21,12 @@ public class ServicoController {
     @Autowired
     private ServicoService service; // injeta a classe Service aqui no controller
 
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
-    public ResponseEntity<Servico> cadastrar(@Valid @RequestBody ServicoDTO dto) {
+    public ResponseEntity<ServicoDTO> cadastrar(@RequestPart("dados") ServicoDTO dto, @RequestPart("imagem")MultipartFile arquivo) {
         Servico servico = new Servico(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.cadastro(servico));
+        service.cadastro(servico,arquivo);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
         //serve pra receber requisições HTTP Json e mandar para as regras de negocio (Service)
     }
 
