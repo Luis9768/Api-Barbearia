@@ -1,6 +1,7 @@
 package com.barbearia.barbershop_api.service;
 
 import com.barbearia.barbershop_api.dto.HIstoricoServicoDTO;
+import com.barbearia.barbershop_api.dto.ServicoDTO;
 import com.barbearia.barbershop_api.model.LogAlteracaoServico;
 import com.barbearia.barbershop_api.model.Perfil;
 import com.barbearia.barbershop_api.model.Servico;
@@ -36,7 +37,8 @@ public class ServicoService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public Servico cadastro(Servico servico, MultipartFile arquivo) {
+    @Transactional
+    public ServicoDTO cadastro(Servico servico, MultipartFile arquivo) {
         if (servico.getDuracaoMinutos() == null || servico.getDuracaoMinutos() < 0) {
             throw new IllegalArgumentException("Tempo de duração inválido.");
         }
@@ -51,7 +53,8 @@ public class ServicoService {
                 throw new IllegalArgumentException("Erro ao processar a imagem do serviço!");
             }
         }
-        return repository.save(servico);
+        repository.save(servico);
+        return new ServicoDTO(servico);
     }
 
 
@@ -62,19 +65,35 @@ public class ServicoService {
 
 
     public Servico buscarPorId(Integer id) {
-        return repository.findById(id).orElse(null);
+        return repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Servico não encontrado!"));
     }//faz uma busca de um servico X por id
 
-    public Servico atualizar(Integer id, Servico dadosNovos) {
-        Servico servicoAntigo = repository.findById(id).orElse(null);
-        if (servicoAntigo == null) {
-            return null;
+    @Transactional
+    public ServicoDTO atualizar(Integer id, ServicoDTO dto, MultipartFile arquivo) {
+        Servico servicoAntigo = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Servico para atualizar não encontrado!"));
+
+        if(dto.getNome() != null && !dto.getNome().isBlank()) {
+            servicoAntigo.setNome(dto.getNome());
         }
-        servicoAntigo.setNome(dadosNovos.getNome());
-        servicoAntigo.setDescricao(dadosNovos.getDescricao());
-        servicoAntigo.setPreco(dadosNovos.getPreco());
-        servicoAntigo.setDuracaoMinutos(dadosNovos.getDuracaoMinutos());
-        return repository.save(servicoAntigo);
+        if (dto.getDescricao() != null && !dto.getDescricao().isBlank()) {
+            servicoAntigo.setDescricao(dto.getDescricao());
+        }
+        if (dto.getPreco() != null) {
+            servicoAntigo.setPreco(dto.getPreco());
+        }
+        if(dto.getDuracaoMinutos() != null) {
+            servicoAntigo.setDuracaoMinutos(dto.getDuracaoMinutos());
+        }
+        if(arquivo != null){
+            try {
+                servicoAntigo.setTipoImagem(arquivo.getContentType());
+                servicoAntigo.setDadosImagem(arquivo.getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        Servico servicoSalvo = repository.save(servicoAntigo);
+        return new ServicoDTO(servicoSalvo);
     }//aqui ele atualizar o servico X buscando ele por Id e salvando os dados novos
 
     public void excluirId(Integer id) {

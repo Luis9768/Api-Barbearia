@@ -30,7 +30,7 @@ public class ServicoController {
         //serve pra receber requisições HTTP Json e mandar para as regras de negocio (Service)
     }
 
-    @GetMapping
+    @GetMapping("/listar")
     public ResponseEntity<List<ServicoDTO>> listar() {
 
         return ResponseEntity.ok(service.listarTudo().stream()
@@ -49,8 +49,18 @@ public class ServicoController {
             return ResponseEntity.notFound().build();
         }
     }
+    @GetMapping("/{id}/imagem")
+    public ResponseEntity<byte[]> pesquisarImagem(@PathVariable Integer id){
+        var buscar = service.buscarPorId(id);
+        if(buscar.getDadosImagem() ==  null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(buscar.getTipoImagem()))
+                .body(buscar.getDadosImagem());
+    }
 
-    @GetMapping("/buscar")
+    @GetMapping("/buscarPorNome")
     public ResponseEntity <List<ServicoDTO>> pesquisarPorNome(@RequestParam String nome){
         var buscarPorNome = service.buscarPorNome(nome);
         return ResponseEntity.ok(buscarPorNome.stream().map(ServicoDTO::new).toList());
