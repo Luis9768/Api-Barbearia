@@ -57,16 +57,13 @@ public class ServicoService {
         return new ServicoDTO(servico);
     }
 
-
     public List<Servico> listarTudo() {
         return repository.findAll();
-    }//metodo que lista todos os servicos da barbearia
-
-
+    }
 
     public Servico buscarPorId(Integer id) {
         return repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Servico não encontrado!"));
-    }//faz uma busca de um servico X por id
+    }
 
     @Transactional
     public ServicoDTO atualizar(Integer id, ServicoDTO dto, MultipartFile arquivo) {
@@ -81,10 +78,10 @@ public class ServicoService {
         if (dto.getPreco() != null) {
             servicoAntigo.setPreco(dto.getPreco());
         }
-        if(dto.getDuracaoMinutos() != null) {
+        if(dto.getDuracaoMinutos() != null && dto.getDuracaoMinutos() != 0) {
             servicoAntigo.setDuracaoMinutos(dto.getDuracaoMinutos());
         }
-        if(arquivo != null){
+        if(arquivo != null && !arquivo.isEmpty()){
             try {
                 servicoAntigo.setTipoImagem(arquivo.getContentType());
                 servicoAntigo.setDadosImagem(arquivo.getBytes());
@@ -94,7 +91,7 @@ public class ServicoService {
         }
         Servico servicoSalvo = repository.save(servicoAntigo);
         return new ServicoDTO(servicoSalvo);
-    }//aqui ele atualizar o servico X buscando ele por Id e salvando os dados novos
+    }
 
     public void excluirId(Integer id) {
         if (agendamentoRepository.existeAgendamentoFuturoParaOServico(id)) {

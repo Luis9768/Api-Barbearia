@@ -67,18 +67,12 @@ public class ServicoController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
-    public ResponseEntity<Servico> atualizarServico(@PathVariable Integer id, @Valid @RequestBody ServicoDTO dto) {
-        Servico servico = new Servico(dto);
-        Servico buscarId = service.buscarPorId(id);
-        if (buscarId == null) {
-            return ResponseEntity.notFound().build();
-        }
-        Servico servicoAtualizado = service.atualizar(id, servico);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ServicoDTO> atualizarServico(@PathVariable Integer id, @Valid @RequestPart("dados") ServicoDTO dto,@RequestPart(value = "imagem",required = false)MultipartFile arquivo) {
+        ServicoDTO servicoAtualizado = service.atualizar(id, dto,arquivo);
         return ResponseEntity.ok(servicoAtualizado);
-        //metodo atualizar, primeiro cria uma variavel para pesquisar o id no banco,
-        // e verifica se ele existe, e depois atualiza e retorna os dados atualizados
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarServico(@PathVariable Integer id) {
@@ -88,8 +82,6 @@ public class ServicoController {
         }
         service.excluirId(id);
         return ResponseEntity.noContent().build();
-        //nesse metodo como la no service ta void pq não retorna nada ele apenas busca o ID no banco
-        //e se achar exclui e o ResponseEntity.noContent não retorna nada
     }
 
 }
