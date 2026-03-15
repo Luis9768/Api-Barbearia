@@ -23,19 +23,19 @@ public class ClienteController {
     private ClienteService service; //injeta a classe clienteService aqui
 
     @PostMapping
-    public ResponseEntity<ClienteDTO> cadastrarUsuario(@Valid @RequestBody ClienteDTO dto) {
+    public ResponseEntity<ClienteDTO> cadastrarUsuario (@Valid @RequestBody ClienteDTO dto) {
         ClienteDTO usuario = service.cadastroUsuario(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
     }
 
     @GetMapping
-    public ResponseEntity<List<ClienteDTO>> listarUsuarios(@AuthenticationPrincipal Usuario usuarioLogado) {
+    public ResponseEntity<List<ClienteDTO>> listarUsuarios (@AuthenticationPrincipal Usuario usuarioLogado) {
         return ResponseEntity.ok(service.listarUsuarios(usuarioLogado));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/buscarPorNome")
-    public ResponseEntity<List<ClienteDTO>> buscarClienteNome(@RequestParam String name, @AuthenticationPrincipal Usuario usuarioLogado){
+    public ResponseEntity<List<ClienteDTO>> buscarClienteNome (@RequestParam String name, @AuthenticationPrincipal Usuario usuarioLogado){
         var buscarNome = service.pesquisarPorNome(name,  usuarioLogado);
         return ResponseEntity.ok(buscarNome.stream().map(ClienteDTO::new).toList());
     }
@@ -50,7 +50,7 @@ public class ClienteController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarUsuario(@PathVariable Integer id, @AuthenticationPrincipal Usuario usuarioLogado) {
+    public ResponseEntity<Void> deletarUsuario (@PathVariable Integer id, @AuthenticationPrincipal Usuario usuarioLogado) {
         service.excluirUsuarioId(id, usuarioLogado);
         return ResponseEntity.noContent().build();
     }

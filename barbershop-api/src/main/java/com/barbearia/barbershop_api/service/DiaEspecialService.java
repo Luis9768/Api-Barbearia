@@ -57,7 +57,7 @@ public class DiaEspecialService {
     }
 
     @Transactional
-    public SaidaDiaEspecialDTO atualizarDiaEspecial(int id, DadosEntradaDiaEspecial dados, Usuario usuarioLogado) {
+    public SaidaDiaEspecialDTO atualizarDiaEspecial(Integer id, DadosEntradaDiaEspecial dados, Usuario usuarioLogado) {
         if (usuarioLogado.getPerfil() != Perfil.ADMIN) {
             throw new IllegalArgumentException("Você não tem permissão para realizar esta ação!");
         }
@@ -86,7 +86,7 @@ public class DiaEspecialService {
         repository.delete(buscarDia);
     }
 
-    public DiaEspecial buscarPorId(int id) {
+    public DiaEspecial buscarPorId(Integer id) {
         var buscarDia = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Dia Especial não encontrado!"));
         return buscarDia;
     }

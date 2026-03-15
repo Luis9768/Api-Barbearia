@@ -29,26 +29,26 @@ public class DiaEspecialController {
         return ResponseEntity.status(HttpStatus.CREATED).body(diaEspecial);
     }//ele cria um dia especial na agenda no qual não abrirá
 
-    @GetMapping("/listarDiasEspeciais")
+    @GetMapping
     public ResponseEntity<List<SaidaDiaEspecialDTO>> listarDiaEspecial(){
         var diaEspecial = service.listarDiaEspecial();
         return ResponseEntity.ok(diaEspecial.stream().map(SaidaDiaEspecialDTO::new).toList());
     }
     @GetMapping("/{id}")
-    public ResponseEntity<DiaEspecial> buscarPorId(@RequestParam int id){
+    public ResponseEntity<DiaEspecial> buscarPorId(@PathVariable Integer id){
         var buscarDia = service.buscarPorId(id);
         return ResponseEntity.ok(buscarDia);
     }
 
-    @PutMapping("/atualizarDiaEspecial")
+    @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SaidaDiaEspecialDTO> atualizarDiaEspecial(@RequestParam int id, @RequestBody DadosEntradaDiaEspecial dados, @AuthenticationPrincipal Usuario usuarioLogado){
+    public ResponseEntity<SaidaDiaEspecialDTO> atualizarDiaEspecial(@PathVariable Integer id, @RequestBody DadosEntradaDiaEspecial dados, @AuthenticationPrincipal Usuario usuarioLogado){
         SaidaDiaEspecialDTO diaEspecial = service.atualizarDiaEspecial(id,dados,usuarioLogado);
         return ResponseEntity.ok(diaEspecial);
     }
-    @DeleteMapping("/deletarDiaEspecial")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> excluirDiaEspecial(@RequestParam int id,@AuthenticationPrincipal Usuario usuarioLogado){
+    public ResponseEntity<Void> excluirDiaEspecial(@PathVariable int id,@AuthenticationPrincipal Usuario usuarioLogado){
         service.deletarDiaEspecial(id,usuarioLogado);
         return ResponseEntity.noContent().build();
     }
