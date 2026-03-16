@@ -21,6 +21,8 @@ public record DadosEntradaCadastroAgendamento(
 
         @NotNull(message = "O ID do cliente é obrigatório!")
         Integer clienteId,
+        @NotNull(message = "A escolha do barbeiro é obrigatória")
+        Integer barbeiroId,
 
         @NotNull(message = "O ID do serviço é obrigatório!")
         Integer servicoId) {

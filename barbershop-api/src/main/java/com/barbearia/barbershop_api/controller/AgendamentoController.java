@@ -1,9 +1,6 @@
 package com.barbearia.barbershop_api.controller;
 
-import com.barbearia.barbershop_api.dto.DadosEntradaReagendamento;
-import com.barbearia.barbershop_api.dto.SaidaAgendamentoDTO;
-import com.barbearia.barbershop_api.dto.DadosEntradaCadastroAgendamento;
-import com.barbearia.barbershop_api.dto.FaturamentoDTO;
+import com.barbearia.barbershop_api.dto.*;
 import com.barbearia.barbershop_api.model.Agendamento;
 import com.barbearia.barbershop_api.model.Cliente;
 import com.barbearia.barbershop_api.model.Perfil;
@@ -39,14 +36,13 @@ public class AgendamentoController {
     @Autowired
     private ClienteRepository repositoryCliente;
 
-    @PostMapping("/AgendarHorario")
+    @PostMapping("/Adicionar")
     @Transactional
-    public ResponseEntity<SaidaAgendamentoDTO> agendarHorario(@Valid @RequestBody DadosEntradaCadastroAgendamento dados,@AuthenticationPrincipal Usuario usuarioLogado){
-        Agendamento salvarAgendamento = service.realizarAgendamento(dados, usuarioLogado);
-        var dtoSaida = new SaidaAgendamentoDTO(salvarAgendamento);
-        return ResponseEntity.status(HttpStatus.CREATED).body(dtoSaida);
+    public ResponseEntity<DadosSaidaAgendamento> agendarHorario(@Valid @RequestBody DadosEntradaCadastroAgendamento dados, @AuthenticationPrincipal Usuario usuarioLogado){
+        DadosSaidaAgendamento salvarAgendamento = service.realizarAgendamento(dados, usuarioLogado);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvarAgendamento);
     }
-    @GetMapping("/listarAgendamentos")
+    @GetMapping("/ListarAgendamentos")
     public ResponseEntity<List<SaidaAgendamentoDTO>> listarAgendamentos(@RequestParam(required = false) LocalDate data, @AuthenticationPrincipal Usuario usuarioLogado){
         return ResponseEntity.ok(service.listarAgendamentos(data, usuarioLogado));
     }

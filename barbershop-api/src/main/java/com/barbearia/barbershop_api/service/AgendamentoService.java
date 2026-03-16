@@ -1,8 +1,6 @@
 package com.barbearia.barbershop_api.service;
 
-import com.barbearia.barbershop_api.dto.DadosEntradaReagendamento;
-import com.barbearia.barbershop_api.dto.SaidaAgendamentoDTO;
-import com.barbearia.barbershop_api.dto.DadosEntradaCadastroAgendamento;
+import com.barbearia.barbershop_api.dto.*;
 import com.barbearia.barbershop_api.model.*;
 import com.barbearia.barbershop_api.repository.*;
 import jakarta.transaction.Transactional;
@@ -32,10 +30,12 @@ public class AgendamentoService {
     private ServicoRepository servicoRepository;
     @Autowired
     private DiaEspecialRepository diaEspecialRepository;
+    @Autowired
+    private BarbeiroRepository babeiroRepository;
 
 
     @Transactional
-    public Agendamento realizarAgendamento(DadosEntradaCadastroAgendamento dto, Usuario usuarioLogado) {
+    public DadosSaidaAgendamento realizarAgendamento(DadosEntradaCadastroAgendamento dto, Usuario usuarioLogado) {
 
         validarDataPassado(dto.dataHoraInicio());
         LocalDate validacao = dto.dataHoraInicio().toLocalDate();
@@ -54,7 +54,9 @@ public class AgendamentoService {
         // 3. Validar permissão do usuário
         validarUsuario(usuarioLogado, cliente);
 
-        // 4. Buscar serviço
+        //buscar Barbeiro
+        var barbeiro = babeiroRepository.findById(dto.barbeiroId()).orElseThrow(() -> new IllegalArgumentException("Barbeiro não encontrado!"));
+        // Buscar serviço
         var servico = servicoRepository.findById(dto.servicoId()).orElseThrow(() -> new IllegalArgumentException("Serviço não encontrado com o ID informado!"));
 
         // 5. Calcular horários
@@ -65,17 +67,19 @@ public class AgendamentoService {
         validacaoHorarioExpediente(dataInicio, dataFim);
 
         // 7. Validar conflitos de horário
-        validarConflitosHorario(dataInicio, dataFim);
-
+        if(agendamentoRepository.existeConflitoHorario(barbeiro.getId(),dataInicio,dataFim)){
+            throw new IllegalArgumentException("O barbeiro selecionado já possui um agendamento neste horário!");
+        }
         // 9. Criar e salvar agendamento
         Agendamento agendamento = new Agendamento();
         agendamento.setDataHoraInicio(dataInicio);
         agendamento.setDataHoraFim(dataFim);
         agendamento.setCliente(cliente);
         agendamento.setServico(servico);
+        agendamento.setBarbeiro(barbeiro);
         agendamento.setStatusAgendamento(StatusAgendamento.AGENDADO);
         agendamentoRepository.save(agendamento);
-        return agendamento;
+        return new DadosSaidaAgendamento(agendamento);
     }
 
     @Transactional
@@ -291,12 +295,10 @@ public class AgendamentoService {
         }
     }
 
-    private void validarConflitosHorario(LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim) {
-        var conflitos = agendamentoRepository.findConflitos(dataHoraInicio, dataHoraFim);
-        if (!conflitos.isEmpty()) {
-            throw new IllegalArgumentException("Horário indisponível. Alguém já reservou!");
+    private void validarConflitosHorario(Integer barbeiroId, LocalDateTime dataInicio, LocalDateTime dataFim) {
+        if (agendamentoRepository.existeConflitoHorario(barbeiroId, dataInicio, dataFim)) {
+            throw new IllegalArgumentException("Este barbeiro já possui um agendamento neste horário!");
         }
-
     }
 
     private void validarDatasEntrada(LocalDate dataSolicitada) {

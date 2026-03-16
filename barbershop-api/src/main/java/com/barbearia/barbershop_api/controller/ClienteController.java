@@ -1,6 +1,7 @@
 package com.barbearia.barbershop_api.controller;
 
 import com.barbearia.barbershop_api.dto.ClienteDTO;
+import com.barbearia.barbershop_api.dto.EntradaAtualizarCliente;
 import com.barbearia.barbershop_api.model.Cliente;
 import com.barbearia.barbershop_api.model.Usuario;
 import com.barbearia.barbershop_api.service.ClienteService;
@@ -34,15 +35,15 @@ public class ClienteController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/buscarPorNome")
-    public ResponseEntity<List<ClienteDTO>> buscarClienteNome (@RequestParam String name, @AuthenticationPrincipal Usuario usuarioLogado){
-        var buscarNome = service.pesquisarPorNome(name,  usuarioLogado);
+    @GetMapping("/buscarPorNome/{nome}")
+    public ResponseEntity<List<ClienteDTO>> buscarClienteNome (@PathVariable String nome, @AuthenticationPrincipal Usuario usuarioLogado){
+        var buscarNome = service.pesquisarPorNome(nome,  usuarioLogado);
         return ResponseEntity.ok(buscarNome.stream().map(ClienteDTO::new).toList());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClienteDTO> atualizarDados(@PathVariable Integer id, @Valid @RequestBody ClienteDTO dto, @AuthenticationPrincipal Usuario usuarioLogado) {
-        ClienteDTO usuarioAtualizado = service.atualizar(id, dto, usuarioLogado);
+    public ResponseEntity<EntradaAtualizarCliente> atualizarDados(@PathVariable Integer id, @Valid @RequestBody EntradaAtualizarCliente dto, @AuthenticationPrincipal Usuario usuarioLogado) {
+        EntradaAtualizarCliente usuarioAtualizado = service.atualizar(id, dto, usuarioLogado);
         if (usuarioAtualizado == null) {
             return ResponseEntity.notFound().build();
         }
@@ -56,8 +57,8 @@ public class ClienteController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/buscarPorEmail")
-    public ResponseEntity<Optional<ClienteDTO>> buscarPorEmail(@RequestParam String email,@AuthenticationPrincipal Usuario usuarioLogado){
+    @GetMapping("/buscarPorEmail/{email}")
+    public ResponseEntity<Optional<ClienteDTO>> buscarPorEmail(@PathVariable String email,@AuthenticationPrincipal Usuario usuarioLogado){
         var buscarEmail = service.pesquisarPorEmail(email,usuarioLogado);
         return ResponseEntity.ok(buscarEmail);
     }

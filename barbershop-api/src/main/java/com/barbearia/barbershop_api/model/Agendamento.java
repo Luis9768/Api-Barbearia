@@ -35,6 +35,10 @@ public class Agendamento {
     @JoinColumn(name = "servico_id", referencedColumnName = "id", columnDefinition = "INT")
     private Servico servico;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "barbeiro_id")
+    private Barbeiro barbeiro;
+
     private Boolean ativo = true;
     @Enumerated(EnumType.STRING)
     @Column(length = 30)

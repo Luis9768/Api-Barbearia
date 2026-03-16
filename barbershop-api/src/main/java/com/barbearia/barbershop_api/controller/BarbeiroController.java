@@ -37,12 +37,12 @@ public class BarbeiroController {
         return ResponseEntity.ok(lista);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<BarbeiroDto> listarPorID(@RequestParam int id, @AuthenticationPrincipal Usuario usuarioLogado){
+    public ResponseEntity<BarbeiroDto> listarPorID(@PathVariable int id, @AuthenticationPrincipal Usuario usuarioLogado){
         var listarId = service.buscarPorId(id, usuarioLogado);
         return ResponseEntity.ok(listarId);
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@RequestParam int id, @AuthenticationPrincipal Usuario usuarioLogado){
+    public ResponseEntity<Void> deletar(@PathVariable int id, @AuthenticationPrincipal Usuario usuarioLogado){
          service.deletar(id, usuarioLogado);
         return ResponseEntity.noContent().build();
     }

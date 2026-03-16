@@ -1,6 +1,7 @@
 package com.barbearia.barbershop_api.service;
 
 import com.barbearia.barbershop_api.dto.ClienteDTO;
+import com.barbearia.barbershop_api.dto.EntradaAtualizarCliente;
 import com.barbearia.barbershop_api.model.Agendamento;
 import com.barbearia.barbershop_api.model.Cliente;
 import com.barbearia.barbershop_api.model.Perfil;
@@ -66,37 +67,41 @@ public class ClienteService {
                 .toList();
     }
 
-    public ClienteDTO atualizar(Integer id, ClienteDTO dto, Usuario usuarioLogado) {
+    public EntradaAtualizarCliente atualizar(Integer id, EntradaAtualizarCliente dto, Usuario usuarioLogado) {
         Cliente clienteAntigo = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente para atualizar não encontrado!"));
         boolean ehDono = clienteAntigo.getUsuario().getId().equals(usuarioLogado.getId());
         if (!ehDono) {
             throw new IllegalArgumentException("Você não pode alterar os dados de outra pessoa!");
         }
-        if (dto.getCpf() != null) {
-            Optional<Cliente> existeCpf = repository.findByCpf(dto.getCpf());
+        if (dto.cpf() != null && !dto.cpf().isBlank()) {
+            Optional<Cliente> existeCpf = repository.findByCpf(dto.cpf());
             if (existeCpf.isPresent() && !existeCpf.get().getId().equals(clienteAntigo.getId())) {
                 throw new IllegalArgumentException("Erro: Este CPF já pertence a outro cliente no sistema!");
             }
         }
-        if(dto.getNome() != null && !dto.getNome().isBlank()) {
-            clienteAntigo.setNome(dto.getNome());
+        if(dto.nome() != null && !dto.nome().isBlank()) {
+            clienteAntigo.setNome(dto.nome());
         }
-        if(dto.getContato() !=null && !dto.getContato().isBlank()) {
-            clienteAntigo.setContato(dto.getContato());
+        if(dto.contato() !=null && !dto.contato().isBlank()) {
+            clienteAntigo.setContato(dto.contato());
         }
-        if (dto.getCpf() != null && !dto.getCpf().isBlank()) {
-            clienteAntigo.setCpf(dto.getCpf());
+        if (dto.cpf() != null && !dto.cpf().isBlank()) {
+            clienteAntigo.setCpf(dto.cpf());
         }
-        if(dto.getEmail() != null && !dto.getEmail().isBlank()) {
-            clienteAntigo.setEmail(dto.getEmail());
-            clienteAntigo.getUsuario().setLogin(dto.getEmail());
+        if(dto.email() != null && !dto.email().isBlank()) {
+            clienteAntigo.setEmail(dto.email());
+            clienteAntigo.getUsuario().setLogin(dto.email());
         }
-        if(dto.getDataNascimento() != null) {
-            clienteAntigo.setDataNascimento(dto.getDataNascimento());
+        if(dto.dataNascimento() != null) {
+            clienteAntigo.setDataNascimento(dto.dataNascimento());
+        }
+        if(dto.senha() != null && !dto.senha().isBlank()){
+           String senha = passwordEncoder.encode(dto.senha());
+           clienteAntigo.getUsuario().setSenha(senha);
         }
         clienteAntigo = repository.save(clienteAntigo);
 
-        return new ClienteDTO(clienteAntigo);
+        return new EntradaAtualizarCliente(clienteAntigo);
     }
 
     public void excluirUsuarioId(Integer id, Usuario usuarioLogado) {

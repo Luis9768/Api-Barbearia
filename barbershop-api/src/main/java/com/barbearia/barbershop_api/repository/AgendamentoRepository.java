@@ -50,4 +50,15 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Intege
 
     // Resultado: Traz TUDO do banco (agendados, cancelados, concluídos), furando o bloqueio da sua classe.
     List<Agendamento> findByStatusAgendamentoAndDataHoraFimBefore(StatusAgendamento status, LocalDateTime agora);
+
+    @Query("SELECT COUNT(a) > 0 FROM Agendamento a " +
+            "WHERE a.barbeiro.id = :barbeiroId " +
+            "AND a.dataHoraInicio < :dataFim " +
+            "AND a.dataHoraFim > :dataInicio " +
+            "AND a.statusAgendamento != 'CANCELADO'") // Bônus Sênior: Ignora horários cancelados!
+    boolean existeConflitoHorario(
+            @Param("barbeiroId") Integer barbeiroId,
+            @Param("dataInicio") LocalDateTime dataInicio,
+            @Param("dataFim") LocalDateTime dataFim
+    );
 }
