@@ -36,7 +36,6 @@ public class AgendamentoService {
 
     @Transactional
     public DadosSaidaAgendamento realizarAgendamento(DadosEntradaCadastroAgendamento dto, Usuario usuarioLogado) {
-
         validarDataPassado(dto.dataHoraInicio());
         LocalDate validacao = dto.dataHoraInicio().toLocalDate();
         validarDatasEntrada(validacao);
@@ -65,12 +64,12 @@ public class AgendamentoService {
 
         // 6. Buscar horários de funcionamento do dia
         validacaoHorarioExpediente(dataInicio, dataFim);
+        validarFimExpediente(dataInicio);
 
         // 7. Validar conflitos de horário
         if(agendamentoRepository.existeConflitoHorario(barbeiro.getId(),dataInicio,dataFim)){
             throw new IllegalArgumentException("O barbeiro selecionado já possui um agendamento neste horário!");
         }
-        // 9. Criar e salvar agendamento
         Agendamento agendamento = new Agendamento();
         agendamento.setDataHoraInicio(dataInicio);
         agendamento.setDataHoraFim(dataFim);
@@ -191,27 +190,38 @@ public class AgendamentoService {
         return horariosLivres; // e retorna os horarios livres
     }
 
-    public List<SaidaAgendamentoDTO> listarAgendamentos(LocalDate data, Usuario usuarioLogado) {
-        if (data == null) {
-            data = LocalDate.now(); // Se o cliente não mandar data, assume que ele quer ver os de hoje!
+    public List<DadosSaidaAgendamento> listarAgendamentoPorCliente(Integer id, Usuario usuarioLogado){
+        if(usuarioLogado.getPerfil() != Perfil.ADMIN){
+            Cliente cliente = clienteRepository.findByUsuarioId(usuarioLogado.getId()).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
+            if(!cliente.getId().equals(id)){
+                throw new IllegalArgumentException("Você não tem permissão para acessar o histórico de outro cliente!");
+            }
         }
-        Cliente cliente = clienteRepository.findByUsuarioId(usuarioLogado.getId()).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!")); //pesquisa o cliente logado para garantir que ele existe no banco de dados, caso contrário lança uma exceção
-        //metodo listar agendamentos caso a data esteja vazia
+        List<Agendamento> agendamentos = agendamentoRepository.findByClienteId(id);
+        return agendamentos.stream()
+                .map(DadosSaidaAgendamento::new)
+                .toList();
+    }
+    public List<DadosSaidaAgendamento> listarAgendamentosPorData(LocalDate data, Usuario usuarioLogado){
+        if(data == null){
+            data = LocalDate.now();
+        }
+
         LocalDateTime inicio = data.atStartOfDay();
-        LocalDateTime fim = data.atTime(23, 59, 59);
+        LocalDateTime fim = data.atTime(23,59,59);
 
-        List<Agendamento> listarAgendamentos;
+        List<Agendamento> agendamentos;
 
-        if (cliente.getUsuario().getPerfil() == Perfil.ADMIN) {
-            listarAgendamentos = agendamentoRepository.findByDataHoraInicioBetween(inicio, fim);
-        } else {
-            listarAgendamentos = agendamentoRepository.findByClienteAndDataHoraInicioBetween(cliente, inicio, fim);
+        if(usuarioLogado.getPerfil() == Perfil.ADMIN){
+            agendamentos = agendamentoRepository.findByDataHoraInicioBetween(inicio,fim);
+        }else {
+            Cliente cliente = clienteRepository.findByUsuarioId(usuarioLogado.getId()).orElseThrow(() -> new IllegalArgumentException("CLiente não encontrado!"));
+            agendamentos = agendamentoRepository.findByClienteAndDataHoraInicioBetween(cliente,inicio,fim);
         }
+        return agendamentos.stream()
+                .map(DadosSaidaAgendamento::new)
+                .toList();
 
-        return listarAgendamentos
-                .stream()
-                .map(SaidaAgendamentoDTO::new)
-                .toList(); //se vier com a data preenchida ele retorna com esse filtro de data
     }
 
     public Double calcularFaturamento(LocalDate data, Usuario usuarioLogado) {
@@ -229,7 +239,7 @@ public class AgendamentoService {
         return resultado == null ? 0.0 : resultado;
     }
 
-    public List<SaidaAgendamentoDTO> listarHistoricoCLiente(Integer id, Usuario usuarioLogado) {
+    public List<DadosSaidaAgendamento> listarHistoricoCLiente(Integer id, Usuario usuarioLogado) {
         Cliente cliente = clienteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
         validarUsuario(usuarioLogado, cliente);
         var agendamento = agendamentoRepository.findByClienteIdOrderByDataHoraInicioDesc(id);
@@ -237,7 +247,7 @@ public class AgendamentoService {
             throw new IllegalArgumentException("Nenhum agendamento encontrado para este cliente!");
         }
         return agendamento.stream()
-                .map(SaidaAgendamentoDTO::new)
+                .map(DadosSaidaAgendamento::new)
                 .toList();
     }
 
@@ -270,7 +280,7 @@ public class AgendamentoService {
     private void validacaoHorarioExpediente(LocalDateTime dataInicio, LocalDateTime dataFim) {
 
         LocalDate diaAgendamento = dataInicio.toLocalDate(); //data do agendamento para pesquisar o dia especial
-        var diaEspecialOpt = diaEspecialRepository.findByData(diaAgendamento); // pesquisa se tem um dia especial cadastrado para a data do agendamento, caso tenha ele retorna um Optional com o dia especial, caso contrário ele retorna um Optional vazio
+        Optional<DiaEspecial> diaEspecialOpt = diaEspecialRepository.findByData(diaAgendamento); // pesquisa se tem um dia especial cadastrado para a data do agendamento, caso tenha ele retorna um Optional com o dia especial, caso contrário ele retorna um Optional vazio
 
         LocalDateTime limiteAbertura;
         LocalDateTime limiteFechamento;
@@ -295,9 +305,13 @@ public class AgendamentoService {
         }
     }
 
-    private void validarConflitosHorario(Integer barbeiroId, LocalDateTime dataInicio, LocalDateTime dataFim) {
-        if (agendamentoRepository.existeConflitoHorario(barbeiroId, dataInicio, dataFim)) {
-            throw new IllegalArgumentException("Este barbeiro já possui um agendamento neste horário!");
+    private void validarFimExpediente(LocalDateTime dataHoraInicio){
+        LocalDateTime agora = LocalDateTime.now();
+        LocalTime fechamento = LocalTime.of(18,0);
+        LocalTime horarioLimiteAgendamento = fechamento.minusHours(1);
+        boolean isAgendamentoParaHoje = dataHoraInicio.toLocalDate().equals(agora.toLocalDate());
+        if(isAgendamentoParaHoje && agora.toLocalTime().isAfter(horarioLimiteAgendamento)){
+            throw new IllegalArgumentException("A agenda de hoje já está encerrada! Faltam menos de 1 hora para o fechamento.");
         }
     }
 
@@ -314,7 +328,7 @@ public class AgendamentoService {
     public void atualizarStatusAgendamentosPassados() {
         LocalDateTime agora = LocalDateTime.now();
         List<Agendamento> agendamentosAtrasados = agendamentoRepository.findByStatusAgendamentoAndDataHoraFimBefore(StatusAgendamento.AGENDADO, agora);
-        agendamentosAtrasados.forEach(agendamento -> agendamento.setStatusAgendamento(StatusAgendamento.AGUARDANDO_PAGAMENTO));
+        agendamentosAtrasados.forEach(agendamento -> agendamento.setStatusAgendamento(StatusAgendamento.CONCLUIDO));
         agendamentoRepository.saveAll(agendamentosAtrasados);
     }
 }

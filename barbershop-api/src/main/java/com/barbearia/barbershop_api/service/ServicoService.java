@@ -53,6 +53,7 @@ public class ServicoService {
                 throw new IllegalArgumentException("Erro ao processar a imagem do serviço!");
             }
         }
+        servico.setAtivo(true);
         repository.save(servico);
         return new ServicoDTO(servico);
     }

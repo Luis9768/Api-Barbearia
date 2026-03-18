@@ -45,7 +45,7 @@ public class TokenService {
                     .verify(tokenJWT) // Verifica se o token é válido
                     .getSubject(); // Devolve o e-mail que estava escondido lá dentro
         } catch (JWTVerificationException exception) {
-            throw new RuntimeException("Token JWT inválido ou expirado!");
+            throw new IllegalArgumentException("Token JWT inválido ou expirado!");
         }
     }
 

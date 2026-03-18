@@ -17,14 +17,12 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Intege
     Integer contarConflitos(@Param("inicio") LocalDateTime inicio,
                             @Param("fim") LocalDateTime fim);
 
-    @Query("""
-                SELECT SUM(s.preco) 
-                FROM Agendamento a 
-                JOIN a.servico s 
-                WHERE a.dataHoraInicio BETWEEN :inicio AND :fim 
-                AND a.statusAgendamento = :status
-            """)
-    Double somarFaturamentoPorStatus(LocalDateTime inicio, LocalDateTime fim, StatusAgendamento status);
+    @Query("SELECT SUM(a.servico.preco) FROM Agendamento a WHERE a.dataHoraInicio BETWEEN :inicio AND :fim AND a.statusAgendamento = :status AND a.ativo = false")
+    Double somarFaturamentoPorStatus(
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim,
+            @Param("status") StatusAgendamento status
+    );
 
     List<Agendamento> findByDataHoraInicioBetween(LocalDateTime inicio, LocalDateTime fim);
 
@@ -43,8 +41,6 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Intege
     @Query("SELECT s.nome AS nome, COUNT(a) AS quantidade FROM Agendamento a JOIN a.servico s GROUP BY s.nome ORDER BY quantidade DESC")
     List<ItemRankingDTO> findRankingServicos();
 
-    List<Agendamento> findByClienteAndDataHoraInicioBetween(Cliente cliente, LocalDateTime inicio, LocalDateTime fim);
-
     @Query(value = "SELECT * FROM agendamento WHERE cliente_id = :clienteId", nativeQuery = true)
     List<Agendamento> buscarHistoricoCompleto(Integer clienteId);
 
@@ -60,5 +56,14 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Intege
             @Param("barbeiroId") Integer barbeiroId,
             @Param("dataInicio") LocalDateTime dataInicio,
             @Param("dataFim") LocalDateTime dataFim
+    );
+    @Query("SELECT a FROM Agendamento a WHERE a.cliente.id = :clienteId ORDER BY a.dataHoraInicio DESC")
+    List<Agendamento> findByClienteId(@Param("clienteId") Integer clienteId);
+
+    @Query("SELECT a FROM Agendamento a WHERE a.cliente = :cliente AND a.dataHoraInicio BETWEEN :inicio AND :fim ORDER BY a.dataHoraInicio ASC")
+    List<Agendamento> findByClienteAndDataHoraInicioBetween(
+            @Param("cliente") Cliente cliente,
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim
     );
 }

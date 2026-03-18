@@ -42,17 +42,24 @@ public class AgendamentoController {
         DadosSaidaAgendamento salvarAgendamento = service.realizarAgendamento(dados, usuarioLogado);
         return ResponseEntity.status(HttpStatus.CREATED).body(salvarAgendamento);
     }
-    @GetMapping("/ListarAgendamentos")
-    public ResponseEntity<List<SaidaAgendamentoDTO>> listarAgendamentos(@RequestParam(required = false) LocalDate data, @AuthenticationPrincipal Usuario usuarioLogado){
-        return ResponseEntity.ok(service.listarAgendamentos(data, usuarioLogado));
+    @GetMapping("/ListarAgendamentosPorCliente")
+    public ResponseEntity<List<DadosSaidaAgendamento>> listarAgendamentosPorCLiente(@RequestParam Integer id, @AuthenticationPrincipal Usuario usuario){
+        List<DadosSaidaAgendamento> lista = service.listarAgendamentoPorCliente(id,usuario);
+        return ResponseEntity.ok(lista);
     }
+    @GetMapping("/ListarAgendamentosPorData")
+    public ResponseEntity<List<DadosSaidaAgendamento>> listarAgendamentosPorData(@RequestParam LocalDate data, @AuthenticationPrincipal Usuario usuario){
+        List<DadosSaidaAgendamento> lista = service.listarAgendamentosPorData(data, usuario);
+        return  ResponseEntity.ok(lista);
+    }
+
     @GetMapping("/listarHorariosDisponiveis")
     public ResponseEntity<List<LocalTime>> listarHorariosDisponiveis(@RequestParam LocalDate data, @RequestParam Integer servicoId ){
         var listaHorarios = service.listarHorariosDisponiveis(data,servicoId);
         return ResponseEntity.ok(listaHorarios);
     }
     @GetMapping("/agendamentos/listarHistoricoCliente/{id}")
-    public ResponseEntity<List<SaidaAgendamentoDTO>> listarHistoricoCliente(@PathVariable("id") Integer idCliente, @AuthenticationPrincipal Usuario usuarioLogado){
+    public ResponseEntity<List<DadosSaidaAgendamento>> listarHistoricoCliente(@PathVariable("id") Integer idCliente, @AuthenticationPrincipal Usuario usuarioLogado){
         if(usuarioLogado.getPerfil() == Perfil.CLIENTE){
             var cliente =repositoryCliente.findByUsuarioId(usuarioLogado.getId()).get();
             var lista = service.listarHistoricoCLiente(cliente.getId(), usuarioLogado);
