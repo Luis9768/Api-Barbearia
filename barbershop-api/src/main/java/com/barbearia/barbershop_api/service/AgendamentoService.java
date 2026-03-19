@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -77,6 +78,7 @@ public class AgendamentoService {
         agendamento.setServico(servico);
         agendamento.setBarbeiro(barbeiro);
         agendamento.setStatusAgendamento(StatusAgendamento.AGENDADO);
+        agendamento.setAtivo(true);
         agendamentoRepository.save(agendamento);
         return new DadosSaidaAgendamento(agendamento);
     }
@@ -222,33 +224,6 @@ public class AgendamentoService {
                 .map(DadosSaidaAgendamento::new)
                 .toList();
 
-    }
-
-    public Double calcularFaturamento(LocalDate data, Usuario usuarioLogado) {
-        if (usuarioLogado.getPerfil() != Perfil.ADMIN) {
-            throw new IllegalArgumentException("Você não tem permissão para acessar essa informação!");
-        }
-        if (data == null) {
-            data = LocalDate.now();
-        }
-        validarDataFuturo(data);
-        var inicio = data.atStartOfDay();
-        var fim = data.atTime(23, 59, 59);
-        var status = StatusAgendamento.CONCLUIDO;
-        Double resultado = agendamentoRepository.somarFaturamentoPorStatus(inicio, fim, status); //realiza a consulta no banco de dados para somar o faturamento do dia, caso o resultado seja nulo retorna 0.00
-        return resultado == null ? 0.0 : resultado;
-    }
-
-    public List<DadosSaidaAgendamento> listarHistoricoCLiente(Integer id, Usuario usuarioLogado) {
-        Cliente cliente = clienteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
-        validarUsuario(usuarioLogado, cliente);
-        var agendamento = agendamentoRepository.findByClienteIdOrderByDataHoraInicioDesc(id);
-        if (agendamento.isEmpty()) {
-            throw new IllegalArgumentException("Nenhum agendamento encontrado para este cliente!");
-        }
-        return agendamento.stream()
-                .map(DadosSaidaAgendamento::new)
-                .toList();
     }
 
     public List<ItemRankingDTO> listarRankingServicos() {

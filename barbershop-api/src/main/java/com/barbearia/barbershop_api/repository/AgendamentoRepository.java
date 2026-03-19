@@ -17,13 +17,6 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Intege
     Integer contarConflitos(@Param("inicio") LocalDateTime inicio,
                             @Param("fim") LocalDateTime fim);
 
-    @Query("SELECT SUM(a.servico.preco) FROM Agendamento a WHERE a.dataHoraInicio BETWEEN :inicio AND :fim AND a.statusAgendamento = :status AND a.ativo = false")
-    Double somarFaturamentoPorStatus(
-            @Param("inicio") LocalDateTime inicio,
-            @Param("fim") LocalDateTime fim,
-            @Param("status") StatusAgendamento status
-    );
-
     List<Agendamento> findByDataHoraInicioBetween(LocalDateTime inicio, LocalDateTime fim);
 
     @Query("select count(a) from Agendamento a where a.dataHoraInicio < :dataFim and a.dataHoraFim > :dataInicio and a.id <> :id")

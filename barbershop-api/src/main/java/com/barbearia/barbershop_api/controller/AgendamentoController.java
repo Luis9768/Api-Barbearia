@@ -58,29 +58,13 @@ public class AgendamentoController {
         var listaHorarios = service.listarHorariosDisponiveis(data,servicoId);
         return ResponseEntity.ok(listaHorarios);
     }
-    @GetMapping("/agendamentos/listarHistoricoCliente/{id}")
-    public ResponseEntity<List<DadosSaidaAgendamento>> listarHistoricoCliente(@PathVariable("id") Integer idCliente, @AuthenticationPrincipal Usuario usuarioLogado){
-        if(usuarioLogado.getPerfil() == Perfil.CLIENTE){
-            var cliente =repositoryCliente.findByUsuarioId(usuarioLogado.getId()).get();
-            var lista = service.listarHistoricoCLiente(cliente.getId(), usuarioLogado);
-            return ResponseEntity.ok(lista);
-        } return ResponseEntity.badRequest().build();
-    }
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<Void> cancelarAgendamento(@PathVariable Integer id, @AuthenticationPrincipal Usuario usuarioLogado){
         service.cancelarAgendamento(id, usuarioLogado);
         return ResponseEntity.noContent().build();
     }
-    @GetMapping("/faturamento")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<FaturamentoDTO> faturamento(@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate data, @AuthenticationPrincipal Usuario usuarioLogado){
-        BigDecimal resultado = BigDecimal.valueOf(service.calcularFaturamento(data, usuarioLogado));
-        FaturamentoDTO faturamentoDTO = new FaturamentoDTO();
-        faturamentoDTO.setMensagem("Faturamento do dia "+data);
-        faturamentoDTO.setValor(resultado);
-        return ResponseEntity.ok(faturamentoDTO);
-    }
+
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<SaidaAgendamentoDTO> reagendamento(@PathVariable Integer id, @RequestBody @Valid DadosEntradaReagendamento dados, @AuthenticationPrincipal Usuario usuarioLogado){
