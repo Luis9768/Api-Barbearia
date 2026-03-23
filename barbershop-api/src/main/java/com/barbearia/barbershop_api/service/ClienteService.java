@@ -1,18 +1,18 @@
 package com.barbearia.barbershop_api.service;
 
-import com.barbearia.barbershop_api.dto.ClienteDTO;
-import com.barbearia.barbershop_api.dto.EntradaAtualizarCliente;
-import com.barbearia.barbershop_api.model.Agendamento;
-import com.barbearia.barbershop_api.model.Cliente;
-import com.barbearia.barbershop_api.model.Perfil;
-import com.barbearia.barbershop_api.model.Usuario;
+import com.barbearia.barbershop_api.dto.clienteDto.ClienteDTO;
+import com.barbearia.barbershop_api.dto.clienteDto.DadosEntradaCadastroCliente;
+import com.barbearia.barbershop_api.dto.clienteDto.DadosSaidaListaCLientes;
+import com.barbearia.barbershop_api.dto.clienteDto.EntradaAtualizarCliente;
+import com.barbearia.barbershop_api.entity.Cliente;
+import com.barbearia.barbershop_api.entity.Perfil;
+import com.barbearia.barbershop_api.entity.Usuario;
 import com.barbearia.barbershop_api.repository.ClienteRepository;
 import com.barbearia.barbershop_api.repository.UsuarioLoginRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,17 +28,21 @@ public class ClienteService {
     private PasswordEncoder passwordEncoder;
 
     @Transactional
-    public ClienteDTO cadastroUsuario(ClienteDTO dto) {
-        if (repository.findByCpf(dto.getCpf()).isPresent()) {
-            throw new IllegalArgumentException("CPF já cadastrado!");
+    public DadosEntradaCadastroCliente cadastroUsuario(ClienteDTO dto) {
+        if (repository.existsByCpf(dto.getCpf())) {
+            throw new IllegalArgumentException("Já existe um cliente cadastrado com este CPF/Dado!");
         }
-        if (repository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("E-mail já cadastrado!");
+        if (repository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Já existe um cliente cadastrado com este Email/Dado!");
+        }
+        if (repository.existsByContato(dto.getContato())) {
+            throw new IllegalArgumentException("Já existe um cliente cadastrado com este Contato!");
         }
 
         Usuario usuario = new Usuario();
         usuario.setLogin(dto.getEmail());
         usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
+        usuario.setAtivo(true);
         Usuario usuarioSalvo = usuarioLoginRepository.save(usuario);
 
         Cliente cliente = new Cliente();
@@ -54,16 +58,16 @@ public class ClienteService {
         usuario.setPerfil(Perfil.CLIENTE);
         repository.save(cliente);
 
-        return new ClienteDTO(cliente);
+        return new DadosEntradaCadastroCliente(cliente);
     }
 
-    public List<ClienteDTO> listarUsuarios(Usuario usuarioLogado) {
+    public List<DadosSaidaListaCLientes> listarUsuarios(Usuario usuarioLogado) {
         boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
         if (!ehAdmin) {
             throw new IllegalArgumentException("Você não tem permissão para ver os usuários!");
         }
         return repository.findAll().stream()
-                .map(ClienteDTO::new)
+                .map(DadosSaidaListaCLientes::new)
                 .toList();
     }
 
@@ -104,27 +108,35 @@ public class ClienteService {
         return new EntradaAtualizarCliente(clienteAntigo);
     }
 
-    public void excluirUsuarioId(Integer id, Usuario usuarioLogado) {
-        Cliente cliente = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
+    public void excluirUsuarioId(Integer idAlvo, Usuario usuarioLogado) {
+
+        Usuario usuarioAlvo = usuarioLoginRepository.findById(idAlvo).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado!"));
+
         boolean ehAdmin = usuarioLogado.getPerfil() == Perfil.ADMIN;
-        boolean ehDono = cliente.getUsuario().getId().equals(usuarioLogado.getId());
+        boolean ehDono = usuarioAlvo.getId().equals(usuarioLogado.getId());
         if (!ehAdmin && !ehDono) {
             throw new IllegalArgumentException("Você não tem permissão para deletar este usuário!");
         }
-        cliente.setAtivo(false);
-        repository.save(cliente);
+
+        Cliente clienteAlvo = repository.findByUsuarioId(usuarioAlvo.getId()).orElseThrow(() -> new IllegalArgumentException("Cliente atrelado a este usuário não encontrado!"));
+
+        usuarioAlvo.setAtivo(false);
+        clienteAlvo.setAtivo(false);
+
+        usuarioLoginRepository.save(usuarioAlvo);
+        repository.save(clienteAlvo);
     }
 
-    public List<Cliente> pesquisarPorNome(String nome, Usuario usuarioLogado) {
+    public List<DadosSaidaListaCLientes> pesquisarPorNome(String nome, Usuario usuarioLogado) {
         if (usuarioLogado.getPerfil() == Perfil.ADMIN) {
-            return repository.findByNomeContainingIgnoreCase(nome);
+            return repository.findByNomeContainingIgnoreCase(nome).stream().map(DadosSaidaListaCLientes::new).toList();
         } else {
             throw new IllegalArgumentException("Você não tem permissão para pesquisar usuários!");
         }
     }
-    public Optional<ClienteDTO> pesquisarPorEmail(String email, Usuario usuarioLogado){
+    public Optional<DadosSaidaListaCLientes> pesquisarPorEmail(String email, Usuario usuarioLogado){
         if(usuarioLogado.getPerfil() == Perfil.ADMIN){
-            return repository.findByEmail(email).map(ClienteDTO::new);
+            return repository.findByEmail(email).map(DadosSaidaListaCLientes::new);
         }else {
             throw new IllegalArgumentException("Você não tem permissão para pesquisar usuários!");
         }

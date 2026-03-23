@@ -1,5 +1,6 @@
-package com.barbearia.barbershop_api.dto;
+package com.barbearia.barbershop_api.dto.agendamentoDto;
 
+import com.barbearia.barbershop_api.entity.Agendamento;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
@@ -19,4 +20,10 @@ public record DadosEntradaReagendamento(
         LocalDateTime dataHoraInicio
 
 ) {
+    public DadosEntradaReagendamento(Agendamento agendamento) {
+        this(
+                agendamento.getServico().getId(),
+                agendamento.getDataHoraInicio()
+        );
+    }
 }

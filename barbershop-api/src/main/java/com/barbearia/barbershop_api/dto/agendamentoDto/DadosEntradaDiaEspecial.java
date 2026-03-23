@@ -1,8 +1,7 @@
-package com.barbearia.barbershop_api.dto;
+package com.barbearia.barbershop_api.dto.agendamentoDto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;

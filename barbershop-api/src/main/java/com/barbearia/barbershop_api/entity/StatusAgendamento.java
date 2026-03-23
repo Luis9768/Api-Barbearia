@@ -1,4 +1,4 @@
-package com.barbearia.barbershop_api.model;
+package com.barbearia.barbershop_api.entity;
 
 public enum StatusAgendamento {
     AGENDADO,

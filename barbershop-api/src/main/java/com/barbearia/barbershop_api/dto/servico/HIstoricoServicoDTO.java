@@ -1,6 +1,4 @@
-package com.barbearia.barbershop_api.dto;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
+package com.barbearia.barbershop_api.dto.servico;
 
 import java.time.LocalDateTime;
 

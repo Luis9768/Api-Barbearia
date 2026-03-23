@@ -1,7 +1,7 @@
 package com.barbearia.barbershop_api.controller;
 
-import com.barbearia.barbershop_api.dto.ServicoDTO;
-import com.barbearia.barbershop_api.model.Servico;
+import com.barbearia.barbershop_api.dto.servico.ServicoDTO;
+import com.barbearia.barbershop_api.entity.Servico;
 import com.barbearia.barbershop_api.service.ServicoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

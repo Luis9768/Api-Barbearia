@@ -1,10 +1,9 @@
 package com.barbearia.barbershop_api.controller;
 
-import com.barbearia.barbershop_api.dto.DadosEntradaDiaEspecial;
-import com.barbearia.barbershop_api.dto.DadosEntradaReagendamento;
-import com.barbearia.barbershop_api.dto.SaidaDiaEspecialDTO;
-import com.barbearia.barbershop_api.model.DiaEspecial;
-import com.barbearia.barbershop_api.model.Usuario;
+import com.barbearia.barbershop_api.dto.agendamentoDto.DadosEntradaDiaEspecial;
+import com.barbearia.barbershop_api.dto.agendamentoDto.SaidaDiaEspecialDTO;
+import com.barbearia.barbershop_api.entity.DiaEspecial;
+import com.barbearia.barbershop_api.entity.Usuario;
 import com.barbearia.barbershop_api.service.DiaEspecialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

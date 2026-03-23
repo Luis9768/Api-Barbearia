@@ -1,6 +1,6 @@
-package com.barbearia.barbershop_api.dto;
+package com.barbearia.barbershop_api.dto.clienteDto;
 
-import com.barbearia.barbershop_api.model.Cliente;
+import com.barbearia.barbershop_api.entity.Cliente;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.Email;
@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.br.CPF;
 
-import java.rmi.server.UID;
 import java.time.LocalDate;
 
 @Getter

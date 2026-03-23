@@ -1,6 +1,6 @@
-package com.barbearia.barbershop_api.dto;
+package com.barbearia.barbershop_api.dto.barbeiroDto;
 
-import com.barbearia.barbershop_api.model.Barbeiro;
+import com.barbearia.barbershop_api.entity.Barbeiro;
 
 public record BarbeiroDto(
         Integer id,

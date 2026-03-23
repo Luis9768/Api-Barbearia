@@ -1,9 +1,9 @@
 package com.barbearia.barbershop_api.controller;
 
-import com.barbearia.barbershop_api.dto.BarbeiroDto;
-import com.barbearia.barbershop_api.dto.DadosEntradaAtualizarBarbeiro;
-import com.barbearia.barbershop_api.dto.DadosEntradaCadastroBarbeiro;
-import com.barbearia.barbershop_api.model.Usuario;
+import com.barbearia.barbershop_api.dto.barbeiroDto.BarbeiroDto;
+import com.barbearia.barbershop_api.dto.barbeiroDto.DadosEntradaAtualizarBarbeiro;
+import com.barbearia.barbershop_api.dto.barbeiroDto.DadosEntradaCadastroBarbeiro;
+import com.barbearia.barbershop_api.entity.Usuario;
 import com.barbearia.barbershop_api.service.BarbeiroService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/barbeiro")

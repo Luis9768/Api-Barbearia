@@ -1,4 +1,4 @@
-package com.barbearia.barbershop_api.model;
+package com.barbearia.barbershop_api.entity;
 
 import com.barbearia.barbershop_api.infra.auditoria.AuditoriaListener;
 import jakarta.persistence.*;

@@ -1,17 +1,9 @@
 package com.barbearia.barbershop_api;
 
-import com.barbearia.barbershop_api.model.Perfil;
-import com.barbearia.barbershop_api.model.Usuario;
-import com.barbearia.barbershop_api.repository.UsuarioLoginRepository;
-import org.hibernate.dialect.unique.CreateTableUniqueDelegate;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 @EnableScheduling
 @SpringBootApplication
 public class BarbershopApiApplication {

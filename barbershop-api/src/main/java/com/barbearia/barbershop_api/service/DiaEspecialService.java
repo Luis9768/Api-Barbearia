@@ -1,17 +1,16 @@
 package com.barbearia.barbershop_api.service;
 
-import com.barbearia.barbershop_api.dto.DadosEntradaDiaEspecial;
-import com.barbearia.barbershop_api.dto.SaidaDiaEspecialDTO;
-import com.barbearia.barbershop_api.model.DiaEspecial;
-import com.barbearia.barbershop_api.model.Perfil;
-import com.barbearia.barbershop_api.model.Usuario;
+import com.barbearia.barbershop_api.dto.agendamentoDto.DadosEntradaDiaEspecial;
+import com.barbearia.barbershop_api.dto.agendamentoDto.SaidaDiaEspecialDTO;
+import com.barbearia.barbershop_api.entity.DiaEspecial;
+import com.barbearia.barbershop_api.entity.Perfil;
+import com.barbearia.barbershop_api.entity.Usuario;
 import com.barbearia.barbershop_api.repository.DiaEspecialRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service

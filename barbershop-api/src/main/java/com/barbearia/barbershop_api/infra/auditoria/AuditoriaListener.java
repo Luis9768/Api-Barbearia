@@ -1,7 +1,7 @@
 package com.barbearia.barbershop_api.infra.auditoria;
 
-import com.barbearia.barbershop_api.model.LogAlteracaoServico;
-import com.barbearia.barbershop_api.model.Usuario;
+import com.barbearia.barbershop_api.entity.LogAlteracaoServico;
+import com.barbearia.barbershop_api.entity.Usuario;
 import org.hibernate.envers.RevisionListener;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

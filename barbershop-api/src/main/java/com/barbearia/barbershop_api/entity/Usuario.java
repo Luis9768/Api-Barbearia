@@ -1,8 +1,7 @@
-package com.barbearia.barbershop_api.model;
+package com.barbearia.barbershop_api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +24,7 @@ public class Usuario implements UserDetails {
 
     private String login;
     private String senha;
+    private Boolean ativo;
 
     @Enumerated(EnumType.STRING)
     private Perfil perfil;
@@ -67,6 +67,6 @@ public class Usuario implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.ativo != null ? this.ativo : false;
     }
 }

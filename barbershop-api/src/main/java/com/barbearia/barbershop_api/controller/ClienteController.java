@@ -1,9 +1,10 @@
 package com.barbearia.barbershop_api.controller;
 
-import com.barbearia.barbershop_api.dto.ClienteDTO;
-import com.barbearia.barbershop_api.dto.EntradaAtualizarCliente;
-import com.barbearia.barbershop_api.model.Cliente;
-import com.barbearia.barbershop_api.model.Usuario;
+import com.barbearia.barbershop_api.dto.clienteDto.ClienteDTO;
+import com.barbearia.barbershop_api.dto.clienteDto.DadosEntradaCadastroCliente;
+import com.barbearia.barbershop_api.dto.clienteDto.DadosSaidaListaCLientes;
+import com.barbearia.barbershop_api.dto.clienteDto.EntradaAtualizarCliente;
+import com.barbearia.barbershop_api.entity.Usuario;
 import com.barbearia.barbershop_api.service.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,21 +25,21 @@ public class ClienteController {
     private ClienteService service; //injeta a classe clienteService aqui
 
     @PostMapping
-    public ResponseEntity<ClienteDTO> cadastrarUsuario (@Valid @RequestBody ClienteDTO dto) {
-        ClienteDTO usuario = service.cadastroUsuario(dto);
+    public ResponseEntity<DadosEntradaCadastroCliente> cadastrarUsuario (@Valid @RequestBody ClienteDTO dto) {
+        DadosEntradaCadastroCliente usuario = service.cadastroUsuario(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
     }
 
     @GetMapping
-    public ResponseEntity<List<ClienteDTO>> listarUsuarios (@AuthenticationPrincipal Usuario usuarioLogado) {
+    public ResponseEntity<List<DadosSaidaListaCLientes>> listarUsuarios (@AuthenticationPrincipal Usuario usuarioLogado) {
         return ResponseEntity.ok(service.listarUsuarios(usuarioLogado));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/buscarPorNome/{nome}")
-    public ResponseEntity<List<ClienteDTO>> buscarClienteNome (@PathVariable String nome, @AuthenticationPrincipal Usuario usuarioLogado){
+    public ResponseEntity<List<DadosSaidaListaCLientes>> buscarClienteNome (@PathVariable String nome, @AuthenticationPrincipal Usuario usuarioLogado){
         var buscarNome = service.pesquisarPorNome(nome,  usuarioLogado);
-        return ResponseEntity.ok(buscarNome.stream().map(ClienteDTO::new).toList());
+        return ResponseEntity.ok(buscarNome);
     }
 
     @PutMapping("/{id}")
@@ -58,7 +59,7 @@ public class ClienteController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/buscarPorEmail/{email}")
-    public ResponseEntity<Optional<ClienteDTO>> buscarPorEmail(@PathVariable String email,@AuthenticationPrincipal Usuario usuarioLogado){
+    public ResponseEntity<Optional<DadosSaidaListaCLientes>> buscarPorEmail(@PathVariable String email,@AuthenticationPrincipal Usuario usuarioLogado){
         var buscarEmail = service.pesquisarPorEmail(email,usuarioLogado);
         return ResponseEntity.ok(buscarEmail);
     }

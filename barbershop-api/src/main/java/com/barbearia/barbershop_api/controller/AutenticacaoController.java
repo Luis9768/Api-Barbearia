@@ -1,18 +1,15 @@
 package com.barbearia.barbershop_api.controller;
 
-import com.barbearia.barbershop_api.dto.DadosAutenticacao;
-import com.barbearia.barbershop_api.dto.DadosTokenJWT;
+import com.barbearia.barbershop_api.dto.autenticacaoDto.DadosAutenticacao;
+import com.barbearia.barbershop_api.dto.autenticacaoDto.DadosTokenJWT;
 import com.barbearia.barbershop_api.infra.security.TokenService;
-import com.barbearia.barbershop_api.model.Usuario;
+import com.barbearia.barbershop_api.entity.Usuario;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/login")

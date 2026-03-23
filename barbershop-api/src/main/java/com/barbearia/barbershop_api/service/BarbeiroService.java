@@ -1,16 +1,14 @@
 package com.barbearia.barbershop_api.service;
 
-import com.barbearia.barbershop_api.dto.BarbeiroDto;
-import com.barbearia.barbershop_api.dto.DadosEntradaAtualizarBarbeiro;
-import com.barbearia.barbershop_api.dto.DadosEntradaCadastroBarbeiro;
-import com.barbearia.barbershop_api.model.Barbeiro;
-import com.barbearia.barbershop_api.model.Perfil;
-import com.barbearia.barbershop_api.model.Usuario;
+import com.barbearia.barbershop_api.dto.barbeiroDto.BarbeiroDto;
+import com.barbearia.barbershop_api.dto.barbeiroDto.DadosEntradaAtualizarBarbeiro;
+import com.barbearia.barbershop_api.dto.barbeiroDto.DadosEntradaCadastroBarbeiro;
+import com.barbearia.barbershop_api.entity.Barbeiro;
+import com.barbearia.barbershop_api.entity.Perfil;
+import com.barbearia.barbershop_api.entity.Usuario;
 import com.barbearia.barbershop_api.repository.BarbeiroRepository;
 import com.barbearia.barbershop_api.repository.UsuarioLoginRepository;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotNull;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

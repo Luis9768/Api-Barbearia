@@ -1,6 +1,6 @@
 package com.barbearia.barbershop_api.repository;
 
-import com.barbearia.barbershop_api.model.Usuario;
+import com.barbearia.barbershop_api.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 

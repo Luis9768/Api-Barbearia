@@ -1,11 +1,11 @@
 package com.barbearia.barbershop_api.service;
 
-import com.barbearia.barbershop_api.dto.HIstoricoServicoDTO;
-import com.barbearia.barbershop_api.dto.ServicoDTO;
-import com.barbearia.barbershop_api.model.LogAlteracaoServico;
-import com.barbearia.barbershop_api.model.Perfil;
-import com.barbearia.barbershop_api.model.Servico;
-import com.barbearia.barbershop_api.model.Usuario;
+import com.barbearia.barbershop_api.dto.servico.HIstoricoServicoDTO;
+import com.barbearia.barbershop_api.dto.servico.ServicoDTO;
+import com.barbearia.barbershop_api.entity.LogAlteracaoServico;
+import com.barbearia.barbershop_api.entity.Perfil;
+import com.barbearia.barbershop_api.entity.Servico;
+import com.barbearia.barbershop_api.entity.Usuario;
 import com.barbearia.barbershop_api.repository.AgendamentoRepository;
 import com.barbearia.barbershop_api.repository.ServicoRepository;
 import jakarta.persistence.EntityManager;
@@ -25,7 +25,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class ServicoService {

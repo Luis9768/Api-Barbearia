@@ -1,9 +1,5 @@
 package com.barbearia.barbershop_api;
 
-import com.barbearia.barbershop_api.dto.DadosEntradaCadastroAgendamento;
-import com.barbearia.barbershop_api.model.Agendamento;
-import com.barbearia.barbershop_api.model.Cliente;
-import com.barbearia.barbershop_api.model.Servico;
 import com.barbearia.barbershop_api.repository.AgendamentoRepository;
 import com.barbearia.barbershop_api.repository.ClienteRepository;
 import com.barbearia.barbershop_api.repository.ServicoRepository;
@@ -14,10 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.verification.VerificationMode;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;

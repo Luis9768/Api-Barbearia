@@ -1,16 +1,15 @@
 package com.barbearia.barbershop_api.service;
 
-import com.barbearia.barbershop_api.dto.*;
-import com.barbearia.barbershop_api.model.*;
+import com.barbearia.barbershop_api.dto.agendamentoDto.DadosEntradaCadastroAgendamento;
+import com.barbearia.barbershop_api.dto.agendamentoDto.DadosEntradaReagendamento;
+import com.barbearia.barbershop_api.dto.agendamentoDto.DadosSaidaAgendamento;
+import com.barbearia.barbershop_api.entity.*;
 import com.barbearia.barbershop_api.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -110,40 +109,50 @@ public class AgendamentoService {
     }
 
     @Transactional
-    public Agendamento reagendar(Integer id, DadosEntradaReagendamento dados, Usuario usuarioLogado) {
+    public DadosEntradaReagendamento reagendar(Integer id, DadosEntradaReagendamento dados, Usuario usuarioLogado) {
+
         LocalDate validacao = dados.dataHoraInicio().toLocalDate();
         validarDatasEntrada(validacao);
 
-        Agendamento agendamento = agendamentoRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Agendamento não encontrado")); //busca o id
+        Agendamento agendamento = agendamentoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Agendamento não encontrado"));
 
         if (agendamento.getStatusAgendamento() != StatusAgendamento.AGENDADO) {
             throw new IllegalArgumentException("Este agendamento não pode ser reagendado pois está: " + agendamento.getStatusAgendamento());
         }
 
-        validarUsuario(usuarioLogado, agendamento.getCliente()); // valida o usuario logado para ver se ele tem permissão para reagendar o agendamento
+        validarUsuario(usuarioLogado, agendamento.getCliente());
 
-        Servico servico = servicoRepository.findById(dados.servicoId()).orElseThrow(() -> new IllegalArgumentException("Servico não encontrado")); //pesquisa serviço
+        Servico servico = servicoRepository.findById(dados.servicoId())
+                .orElseThrow(() -> new IllegalArgumentException("Serviço não encontrado"));
 
         validarDataPassado(dados.dataHoraInicio());
+
         LocalDateTime dataInicio = dados.dataHoraInicio();
         LocalDateTime dataFinal = dados.dataHoraInicio().plusMinutes(servico.getDuracaoMinutos());
+
         validacaoHorarioExpediente(dataInicio, dataFinal);
 
-        var buscarAgendamento = agendamentoRepository.contarConflitosParaReagendamento(dados.dataHoraInicio(), dataFinal, id); //metodo para contar se tem algum agendamento que conflite com o reagendamento, levando em consideração o id do agendamento atual para não contar ele mesmo como conflito
+        var conflitos = agendamentoRepository.contarConflitosParaReagendamento(dataInicio, dataFinal, id);
 
-        if (buscarAgendamento > 0) {
+        if (conflitos > 0) {
             throw new IllegalArgumentException("Horário ocupado! Escolha outro horário.");
         }
+
         agendamento.setServico(servico);
-        agendamento.setDataHoraInicio(dados.dataHoraInicio());
+        agendamento.setDataHoraInicio(dataInicio);
         agendamento.setStatusAgendamento(StatusAgendamento.AGENDADO);
-        return agendamentoRepository.save(agendamento);
+
+        agendamentoRepository.save(agendamento);
+
+        return new DadosEntradaReagendamento(agendamento);
     }
 
-    public List<LocalTime> listarHorariosDisponiveis(LocalDate data, Integer servicoId) {
+    public List<LocalTime> listarHorariosDisponiveis(Integer barbeiroId, LocalDate data, Integer servicoId) {
         validarDatasEntrada(data);
 
-        var duracaoMinutos = servicoRepository.findById(servicoId); // pesquisar servico e guardar numa variavel
+        Servico servico = servicoRepository.findById(servicoId).orElseThrow(() -> new IllegalArgumentException("Servico não encontrado!"));
+        int duracaoMinutos = servico.getDuracaoMinutos();
         var diaEspecial = diaEspecialRepository.findByData(data); // pesquisar ver se é uma data especial e guardar numa variavel
 
         LocalDateTime inicioExpediente; // variavel controle de inicio de expediente
@@ -167,30 +176,45 @@ public class AgendamentoService {
             inicioExpediente = LocalDateTime.of(data, LocalTime.of(8, 0)); //se não segue horario normal abertura
             fimExpediente = LocalDateTime.of(data, LocalTime.of(18, 0)); // se não segue horario normal de fechamento
         }
+        List<Agendamento> agendamentosBarbeiro = agendamentoRepository.buscarPorBarbeiroEData(barbeiroId,data);
+        List<LocalTime> horariosDisponiveis = new ArrayList<>();
 
-        List<Agendamento> agendamentoDia = agendamentoRepository.findByDataHoraInicioBetween(inicioExpediente, fimExpediente); //metodo para pesquisar no banco o fim e o inicio do expediendo do dia
+        LocalTime horarioAtual = inicioExpediente.toLocalTime();
+        LocalTime fimExpedienteTime = fimExpediente.toLocalTime();
 
-        List<LocalTime> horariosLivres = new ArrayList<>(); // array vazio para colocar os horarios livres
+        LocalTime agora = LocalTime.now();
+        Boolean ehhoje = data.isEqual(LocalDate.now());
 
-        LocalDateTime cursor = inicioExpediente;
+        while ((horarioAtual.plusMinutes(duracaoMinutos).isBefore(fimExpedienteTime))||
+                horarioAtual.plusMinutes(duracaoMinutos).equals(fimExpedienteTime)){
+            if(ehhoje && horarioAtual.isBefore(agora)){
+                horarioAtual = horarioAtual.plusMinutes(duracaoMinutos);
+                continue;
+            }
+            boolean horarioOcupado = false;
+            for (Agendamento agendamento : agendamentosBarbeiro) {
+                LocalTime inicioAgendado = agendamento.getDataHoraInicio().toLocalTime();
+                // Calcula quando o corte agendado termina
+                LocalTime fimAgendado = inicioAgendado.plusMinutes(agendamento.getServico().getDuracaoMinutos());
 
-        //Logica agendamento e horarios disponiveis
-        while (cursor.plusMinutes(duracaoMinutos.get().getDuracaoMinutos()).isBefore(fimExpediente) || cursor.plusMinutes(duracaoMinutos.get().getDuracaoMinutos()).isEqual(fimExpediente)) {
-            boolean ocupado = false; //vaga de ocupado = false
-            LocalDateTime fimDoSlot = cursor.plusMinutes(duracaoMinutos.get().getDuracaoMinutos()); // duração do servico reservada do horaio x ate o horario x
-            for (Agendamento agendamento : agendamentoDia) {     //for para leitura
-                if (cursor.isBefore(agendamento.getDataHoraFim()) && fimDoSlot.isAfter(agendamento.getDataHoraInicio())) { // se o agendamento for depois do fechamento e antes da abertura a lista fica fechada
-                    ocupado = true;
-                    break;
+                // Lógica de colisão: Verifica se o novo corte tenta entrar no meio de um corte já existente
+                if (horarioAtual.isBefore(fimAgendado) &&
+                        horarioAtual.plusMinutes(duracaoMinutos).isAfter(inicioAgendado)) {
+                    horarioOcupado = true;
+                    break; // Bateu horário! Para de procurar e marca como ocupado.
                 }
             }
-            if (!ocupado) {
-                horariosLivres.add(cursor.toLocalTime()); // se não estiver com vaga preenciada adiciona na lista de agendamentos
+            if (!horarioOcupado) {
+                horariosDisponiveis.add(horarioAtual);
             }
-            cursor = cursor.plusMinutes(duracaoMinutos.get().getDuracaoMinutos()); // faz a contagem da duração de minutos do servico
+
+            // Pula para o próximo slot de tempo (Estou usando a duração do serviço, ex: de 40 em 40 min)
+            // Dica: Muitos sistemas preferem pular de 30 em 30 min fixo (horarioAtualIteracao.plusMinutes(30))
+            horarioAtual = horarioAtual.plusMinutes(duracaoMinutos);
         }
-        return horariosLivres; // e retorna os horarios livres
+        return horariosDisponiveis;
     }
+
 
     public List<DadosSaidaAgendamento> listarAgendamentoPorCliente(Integer id, Usuario usuarioLogado){
         if(usuarioLogado.getPerfil() != Perfil.ADMIN){

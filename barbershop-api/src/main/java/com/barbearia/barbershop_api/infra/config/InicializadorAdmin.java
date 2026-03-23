@@ -1,7 +1,7 @@
 package com.barbearia.barbershop_api.infra.config;
 
-import com.barbearia.barbershop_api.model.Perfil;
-import com.barbearia.barbershop_api.model.Usuario;
+import com.barbearia.barbershop_api.entity.Perfil;
+import com.barbearia.barbershop_api.entity.Usuario;
 import com.barbearia.barbershop_api.repository.UsuarioLoginRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;

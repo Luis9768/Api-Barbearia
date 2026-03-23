@@ -1,10 +1,9 @@
-package com.barbearia.barbershop_api.dto;
+package com.barbearia.barbershop_api.dto.servico;
 
-import com.barbearia.barbershop_api.model.Servico;
+import com.barbearia.barbershop_api.entity.Servico;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 

@@ -1,6 +1,6 @@
-package com.barbearia.barbershop_api.dto;
+package com.barbearia.barbershop_api.dto.agendamentoDto;
 
-import com.barbearia.barbershop_api.model.Agendamento;
+import com.barbearia.barbershop_api.entity.Agendamento;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;

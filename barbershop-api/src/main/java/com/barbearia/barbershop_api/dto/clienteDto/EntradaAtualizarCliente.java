@@ -1,8 +1,7 @@
-package com.barbearia.barbershop_api.dto;
+package com.barbearia.barbershop_api.dto.clienteDto;
 
-import com.barbearia.barbershop_api.model.Cliente;
+import com.barbearia.barbershop_api.entity.Cliente;
 import jakarta.validation.constraints.Email;
-import org.hibernate.validator.constraints.br.CPF;
 
 import java.time.LocalDate;
 

@@ -1,10 +1,8 @@
-package com.barbearia.barbershop_api.model;
+package com.barbearia.barbershop_api.entity;
 
-import com.barbearia.barbershop_api.dto.ServicoDTO;
+import com.barbearia.barbershop_api.dto.servico.ServicoDTO;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.envers.Audited;

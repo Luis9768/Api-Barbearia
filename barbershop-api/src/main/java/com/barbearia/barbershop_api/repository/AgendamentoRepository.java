@@ -1,12 +1,13 @@
 package com.barbearia.barbershop_api.repository;
 
-import com.barbearia.barbershop_api.model.Agendamento;
-import com.barbearia.barbershop_api.model.Cliente;
-import com.barbearia.barbershop_api.model.StatusAgendamento;
+import com.barbearia.barbershop_api.entity.Agendamento;
+import com.barbearia.barbershop_api.entity.Cliente;
+import com.barbearia.barbershop_api.entity.StatusAgendamento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -58,5 +59,11 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Intege
             @Param("cliente") Cliente cliente,
             @Param("inicio") LocalDateTime inicio,
             @Param("fim") LocalDateTime fim
+    );
+    // Busca todos os agendamentos de um barbeiro específico (ignorando os cancelados!)
+    @Query("SELECT a FROM Agendamento a WHERE a.barbeiro.id = :barbeiroId AND DATE(a.dataHoraInicio) = :data AND a.statusAgendamento != 'CANCELADO'")
+    List<Agendamento> buscarPorBarbeiroEData(
+            @Param("barbeiroId") Integer barbeiroId,
+            @Param("data") LocalDate data
     );
 }

@@ -1,4 +1,4 @@
-package com.barbearia.barbershop_api.model;
+package com.barbearia.barbershop_api.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

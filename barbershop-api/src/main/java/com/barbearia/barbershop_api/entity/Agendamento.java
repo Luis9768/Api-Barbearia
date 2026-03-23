@@ -1,13 +1,11 @@
-package com.barbearia.barbershop_api.model;
+package com.barbearia.barbershop_api.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NonNull;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.sql.Update;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 
 @Entity

@@ -1,6 +1,6 @@
 package com.barbearia.barbershop_api.repository;
 
-import com.barbearia.barbershop_api.model.Servico;
+import com.barbearia.barbershop_api.entity.Servico;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

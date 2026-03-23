@@ -1,7 +1,7 @@
 package com.barbearia.barbershop_api.controller;
 
-import com.barbearia.barbershop_api.dto.HIstoricoServicoDTO;
-import com.barbearia.barbershop_api.model.Usuario;
+import com.barbearia.barbershop_api.dto.servico.HIstoricoServicoDTO;
+import com.barbearia.barbershop_api.entity.Usuario;
 import com.barbearia.barbershop_api.service.ServicoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

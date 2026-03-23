@@ -1,4 +1,4 @@
-package com.barbearia.barbershop_api.dto;
+package com.barbearia.barbershop_api.dto.agendamentoDto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
