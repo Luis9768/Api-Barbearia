@@ -216,33 +216,46 @@ public class AgendamentoService {
     }
 
 
-    public List<DadosSaidaAgendamento> listarAgendamentoPorCliente(Integer id, Usuario usuarioLogado){
-        if(usuarioLogado.getPerfil() != Perfil.ADMIN){
-            Cliente cliente = clienteRepository.findByUsuarioId(usuarioLogado.getId()).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
-            if(!cliente.getId().equals(id)){
-                throw new IllegalArgumentException("Você não tem permissão para acessar o histórico de outro cliente!");
+    public List<DadosSaidaAgendamento> listarAgendamentoPorCliente(Integer clienteId, Usuario usuarioLogado){
+        Integer clienteIdConsulta;
+
+        if(usuarioLogado.getPerfil() == Perfil.ADMIN){
+            if (clienteId == null) {
+                throw new IllegalArgumentException("Admin deve informar o clienteId.");
             }
+            clienteRepository.findById(clienteId)
+                    .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
+
+            clienteIdConsulta = clienteId;
+        } else {
+            Cliente cliente = clienteRepository.findByUsuarioId(usuarioLogado.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
+
+            clienteIdConsulta = cliente.getId();
         }
-        List<Agendamento> agendamentos = agendamentoRepository.findByClienteId(id);
+
+        List<Agendamento> agendamentos = agendamentoRepository.buscarHistoricoCompleto(clienteIdConsulta);
+
         return agendamentos.stream()
                 .map(DadosSaidaAgendamento::new)
                 .toList();
     }
+
     public List<DadosSaidaAgendamento> listarAgendamentosPorData(LocalDate data, Usuario usuarioLogado){
         if(data == null){
             data = LocalDate.now();
         }
 
         LocalDateTime inicio = data.atStartOfDay();
-        LocalDateTime fim = data.atTime(23,59,59);
+        LocalDateTime fim = data.plusDays(1).atStartOfDay();
 
         List<Agendamento> agendamentos;
 
         if(usuarioLogado.getPerfil() == Perfil.ADMIN){
-            agendamentos = agendamentoRepository.findByDataHoraInicioBetween(inicio,fim);
+            agendamentos = agendamentoRepository.listarTodosPorDataNativo(inicio,fim);
         }else {
             Cliente cliente = clienteRepository.findByUsuarioId(usuarioLogado.getId()).orElseThrow(() -> new IllegalArgumentException("CLiente não encontrado!"));
-            agendamentos = agendamentoRepository.findByClienteAndDataHoraInicioBetween(cliente,inicio,fim);
+            agendamentos = agendamentoRepository.listarTodosPorClienteEData(cliente.getId(),inicio,fim);
         }
         return agendamentos.stream()
                 .map(DadosSaidaAgendamento::new)

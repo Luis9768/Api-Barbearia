@@ -3,6 +3,7 @@ package com.barbearia.barbershop_api.repository;
 import com.barbearia.barbershop_api.entity.Agendamento;
 import com.barbearia.barbershop_api.entity.Cliente;
 import com.barbearia.barbershop_api.entity.StatusAgendamento;
+import org.antlr.v4.runtime.atn.SemanticContext;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -65,5 +66,31 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Intege
     List<Agendamento> buscarPorBarbeiroEData(
             @Param("barbeiroId") Integer barbeiroId,
             @Param("data") LocalDate data
+    );
+    @Query(value = """
+    SELECT *
+    FROM agendamento
+    WHERE data_hora_inicio BETWEEN :inicio AND :fim
+    AND status_agendamento IN ('AGENDADO', 'CANCELADO', 'CONCLUIDO')
+    ORDER BY data_hora_inicio ASC
+""", nativeQuery = true)
+    List<Agendamento> listarTodosPorDataNativo(
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim
+    );
+
+    @Query(value = """
+    SELECT *
+    FROM agendamento
+    WHERE cliente_id = :clienteId
+      AND data_hora_inicio >= :inicio
+      AND data_hora_inicio < :fim
+      AND status_agendamento IN ('AGENDADO', 'CANCELADO', 'CONCLUIDO')
+    ORDER BY data_hora_inicio ASC
+""", nativeQuery = true)
+    List<Agendamento> listarTodosPorClienteEData(
+            @Param("clienteId") Integer clienteId,
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim
     );
 }
