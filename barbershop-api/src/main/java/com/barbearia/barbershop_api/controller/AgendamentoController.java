@@ -41,8 +41,8 @@ public class AgendamentoController {
         return ResponseEntity.ok(lista);
     }
     @GetMapping("/ListarAgendamentosPorData")
-    public ResponseEntity<List<DadosSaidaAgendamento>> listarAgendamentosPorData(@RequestParam LocalDate data, @AuthenticationPrincipal Usuario usuario){
-        List<DadosSaidaAgendamento> lista = service.listarAgendamentosPorData(data, usuario);
+    public ResponseEntity<List<DadosSaidaAgendamento>> listarAgendamentosPorDataBarbeiro(@RequestParam LocalDate data, @RequestParam Integer barbeiroId, @AuthenticationPrincipal Usuario usuario){
+        List<DadosSaidaAgendamento> lista = service.listarAgendamentosPorDataBarbeiro(data, barbeiroId, usuario);
         return  ResponseEntity.ok(lista);
     }
 

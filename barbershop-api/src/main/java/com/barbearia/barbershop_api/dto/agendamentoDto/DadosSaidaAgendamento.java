@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 
 public record DadosSaidaAgendamento(
+        Integer id,
         String nome,
         String nomeServico,
         @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
@@ -16,6 +17,7 @@ public record DadosSaidaAgendamento(
 ) {
     public DadosSaidaAgendamento(Agendamento agendamento) {
         this(
+                agendamento.getId(),
                 agendamento.getCliente().getNome(),
                 agendamento.getServico().getNome(),
                 agendamento.getDataHoraInicio(),

@@ -241,22 +241,21 @@ public class AgendamentoService {
                 .toList();
     }
 
-    public List<DadosSaidaAgendamento> listarAgendamentosPorData(LocalDate data, Usuario usuarioLogado){
+    public List<DadosSaidaAgendamento> listarAgendamentosPorDataBarbeiro(LocalDate data, Integer barbeiroId, Usuario usuarioLogado){
         if(data == null){
             data = LocalDate.now();
+        }
+        if (barbeiroId == null) {
+            throw new IllegalArgumentException("O id do barbeiro é obrigatório.");
         }
 
         LocalDateTime inicio = data.atStartOfDay();
         LocalDateTime fim = data.plusDays(1).atStartOfDay();
 
-        List<Agendamento> agendamentos;
+        babeiroRepository.findById(barbeiroId)
+                .orElseThrow(() -> new IllegalArgumentException("Barbeiro não encontrado!"));
 
-        if(usuarioLogado.getPerfil() == Perfil.ADMIN){
-            agendamentos = agendamentoRepository.listarTodosPorDataNativo(inicio,fim);
-        }else {
-            Cliente cliente = clienteRepository.findByUsuarioId(usuarioLogado.getId()).orElseThrow(() -> new IllegalArgumentException("CLiente não encontrado!"));
-            agendamentos = agendamentoRepository.listarTodosPorClienteEData(cliente.getId(),inicio,fim);
-        }
+        List<Agendamento> agendamentos = agendamentoRepository.listarTodosPorBarbeiroEData(barbeiroId, inicio, fim);
         return agendamentos.stream()
                 .map(DadosSaidaAgendamento::new)
                 .toList();

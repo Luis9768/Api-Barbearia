@@ -43,14 +43,10 @@ public class Agendamento {
     private StatusAgendamento statusAgendamento;
 
     @PrePersist
-    @PreUpdate
     public void prePersist() {
-       //serve para ele sempre iniciar como true
-        if(StatusAgendamento.AGENDADO.equals(this.statusAgendamento)){
-            this.ativo = true;
-        }else{
-            this.ativo = false;
-        }
+       if(this.ativo == null){
+           this.ativo = true;
+       }
     }
 
     public Agendamento() {
