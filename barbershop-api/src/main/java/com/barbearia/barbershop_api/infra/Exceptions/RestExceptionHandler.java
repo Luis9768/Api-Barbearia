@@ -1,4 +1,4 @@
-package com.barbearia.barbershop_api.infra;
+package com.barbearia.barbershop_api.infra.Exceptions;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

@@ -228,6 +228,7 @@ public class AgendamentoService {
                 .map(DadosSaidaAgendamento::new)
                 .toList();
     }
+
     public List<DadosSaidaAgendamento> listarAgendamentosPorData(LocalDate data, Usuario usuarioLogado){
         if(data == null){
             data = LocalDate.now();

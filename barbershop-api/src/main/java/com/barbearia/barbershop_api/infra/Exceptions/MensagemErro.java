@@ -1,4 +1,4 @@
-package com.barbearia.barbershop_api.infra;
+package com.barbearia.barbershop_api.infra.Exceptions;
 
 import lombok.Data;
 
