@@ -2,6 +2,7 @@ package com.barbearia.barbershop_api.dto.clienteDto;
 
 import com.barbearia.barbershop_api.entity.Cliente;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +24,7 @@ public record DadosEntradaCadastroCliente(
 
         @NotNull(message = "A data de nascimento é obrigatória!")
         @JsonFormat(pattern = "dd/MM/yyyy")
+        @Schema(type = "string", example = "24/12/2026")
         LocalDate dataNascimento,
 
         String senha
