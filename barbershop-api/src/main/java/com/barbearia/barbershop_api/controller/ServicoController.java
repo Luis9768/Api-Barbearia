@@ -68,7 +68,7 @@ public class ServicoController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ServicoDTO> atualizarServico(@PathVariable Integer id, @Valid @RequestPart("dados") ServicoDTO dto,@RequestPart(value = "imagem",required = false)MultipartFile arquivo) {
+    public ResponseEntity<ServicoDTO> atualizarServico(@PathVariable Integer id, @Valid @RequestPart(value = "dados",required = false) ServicoDTO dto,@RequestPart(value = "imagem",required = false)MultipartFile arquivo) {
         ServicoDTO servicoAtualizado = service.atualizar(id, dto,arquivo);
         return ResponseEntity.ok(servicoAtualizado);
     }

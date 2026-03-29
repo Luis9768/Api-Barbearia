@@ -65,7 +65,6 @@ public class AgendamentoController {
         return ResponseEntity.ok(agendamentoAtualizado);
     }
     @GetMapping("/rankingAgendamentos")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ItemRankingDTO>> buscarRanking(){
         var buscarLista = service.listarRankingServicos();
         return ResponseEntity.ok(buscarLista);

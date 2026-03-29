@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Diz: "Não guarde estado, é REST"
                 .authorizeHttpRequests(req -> {
                     req.requestMatchers(HttpMethod.POST, "/login","/cliente").permitAll();
+                    req.requestMatchers(HttpMethod.GET,"/servico/*/imagem").permitAll();
                     req.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll();// Libera o Login pra todo mundo
                     req.requestMatchers("/error").permitAll();
                     req.anyRequest().authenticated(); // O resto? Só com cadeado (Token)

@@ -4,11 +4,21 @@ import com.barbearia.barbershop_api.entity.Servico;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @JsonPropertyOrder({"nome", "preco", "descricao", "duracaoMinutos"})
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ServicoDTO {
+
+    private Integer id;
 
     @NotBlank(message = "O nome é obrigatório")
     private String nome; //coluna nome com 100 caracteres no maximo
@@ -19,50 +29,14 @@ public class ServicoDTO {
     private BigDecimal preco; // coluna de precos
 
     @Positive(message = "Tempo não pode ser negativo")
-    private Integer duracaoMinutos; //coluna de duração de minutos do serviço
-
-    //nullable = não pode ser vazia.
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public Integer getDuracaoMinutos() {
-        return duracaoMinutos;
-    }
-
-    public void setDuracaoMinutos(Integer duracaoMinutos) {
-        this.duracaoMinutos = duracaoMinutos;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public BigDecimal getPreco() {
-        return preco;
-    }
-
-    public void setPreco(BigDecimal preco) {
-        this.preco = preco;
-    }
-    //lenght = tamanho.
-    //@Column = coluna
+    private Integer duracaoMinutos;
 
 
     public ServicoDTO(Servico servico) {
+        this.id = servico.getId();
         this.preco = servico.getPreco();
         this.nome = servico.getNome();
         this.descricao = servico.getDescricao();
         this.duracaoMinutos = servico.getDuracaoMinutos();
     }
-    public ServicoDTO(){}
 }

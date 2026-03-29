@@ -68,18 +68,19 @@ public class ServicoService {
     @Transactional
     public ServicoDTO atualizar(Integer id, ServicoDTO dto, MultipartFile arquivo) {
         Servico servicoAntigo = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Servico para atualizar não encontrado!"));
-
-        if(dto.getNome() != null && !dto.getNome().isBlank()) {
-            servicoAntigo.setNome(dto.getNome());
-        }
-        if (dto.getDescricao() != null && !dto.getDescricao().isBlank()) {
-            servicoAntigo.setDescricao(dto.getDescricao());
-        }
-        if (dto.getPreco() != null) {
-            servicoAntigo.setPreco(dto.getPreco());
-        }
-        if(dto.getDuracaoMinutos() != null && dto.getDuracaoMinutos() != 0) {
-            servicoAntigo.setDuracaoMinutos(dto.getDuracaoMinutos());
+        if (dto != null) {
+            if (dto.getNome() != null && !dto.getNome().isBlank()) {
+                servicoAntigo.setNome(dto.getNome());
+            }
+            if (dto.getDescricao() != null && !dto.getDescricao().isBlank()) {
+                servicoAntigo.setDescricao(dto.getDescricao());
+            }
+            if (dto.getPreco() != null) {
+                servicoAntigo.setPreco(dto.getPreco());
+            }
+            if (dto.getDuracaoMinutos() != null && dto.getDuracaoMinutos() != 0) {
+                servicoAntigo.setDuracaoMinutos(dto.getDuracaoMinutos());
+            }
         }
         if(arquivo != null && !arquivo.isEmpty()){
             try {
