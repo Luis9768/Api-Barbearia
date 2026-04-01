@@ -58,4 +58,4 @@ O sistema foi desenhado com separação clara de responsabilidades, utilizando o
 ### Passos para configuração
 1. Clone este repositório:
    ```bash
-   git clone [https://github.com/seu-usuario/afro-kings-api.git](https://github.com/seu-usuario/afro-kings-api.git)
+   git clone [https://github.com/Luis9768/Api-Barbearia.git)
