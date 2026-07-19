@@ -13,6 +13,22 @@ jobs:
       run:
         working-directory: barbershop-api
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: barbearia
+          MYSQL_USER: barbearia_user
+          MYSQL_PASSWORD: barbearia_pass
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
@@ -25,6 +41,10 @@ jobs:
           cache: maven
 
       - name: Rodar testes automatizados
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/barbearia?useSSL=false&allowPublicKeyRetrieval=true
+          SPRING_DATASOURCE_USERNAME: barbearia_user
+          SPRING_DATASOURCE_PASSWORD: barbearia_pass
         run: mvn -B clean test
 
       - name: Empacotar aplicação (.jar)
