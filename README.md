@@ -47,15 +47,55 @@ O sistema foi desenhado com separação clara de responsabilidades, utilizando o
 * **Controller Advice (`@RestControllerAdvice`):** Tratamento global de exceções. Erros de integridade de banco (como CPFs duplicados) ou quebras de regra de negócio (`IllegalArgumentException`) são interceptados e devolvidos ao Front-end como mensagens JSON limpas e amigáveis (Status 400), sem poluir o terminal do servidor.
 * **DTO Pattern via Records:** Utilização intensiva de `records` para transferência de dados entre a camada de apresentação e a regra de negócio, garantindo imutabilidade e proteção de dados sensíveis (ex: senhas não são expostas na resposta HTTP).
 * **Consultas Otimizadas:** Uso de JPQL e chaves estrangeiras virtuais para evitar o problema de N+1 e unir entidades separadas (como Usuário e Cliente) em uma única transação de abate lógico.
+* **Containerização:** Dockerfile multi-stage (build separado do runtime, imagem final enxuta só com JRE) e docker-compose.yml orquestrando API + MySQL para ambiente local idêntico ao de produção.
+Integração Contínua: Workflow no GitHub Actions rodando testes automatizados e validando o build da imagem Docker a cada push/pull request na branch main, antes de qualquer deploy.
 
-## 💻 Como executar o projeto localmente
+🌐 Deploy
 
-### Pré-requisitos
-* Java JDK 17 (ou superior) instalado.
-* Maven instalado.
-* MySQL Server rodando localmente (porta 3306).
+A API está no ar, rodando em produção na Railway:
 
-### Passos para configuração
-1. Clone este repositório:
-   ```bash
-   git clone [https://github.com/Luis9768/Api-Barbearia.git)
+
+API: https://api-barbearia-production-1498.up.railway.app
+Documentação interativa (Swagger): https://api-barbearia-production-1498.up.railway.app/swagger-ui/index.html
+
+
+💻 Como executar o projeto localmente
+
+Opção A — Com Docker (recomendado)
+
+Pré-requisito: Docker instalado.
+
+bashgit clone https://github.com/Luis9768/Api-Barbearia.git
+cd Api-Barbearia/barbershop-api
+docker compose up --build
+
+A API sobe em http://localhost:8080 junto com o banco MySQL, sem precisar instalar Java, Maven ou MySQL na sua máquina.
+
+Opção B — Ambiente local (sem Docker)
+
+Pré-requisitos:
+
+
+Java JDK 21 (ou superior) instalado.
+Maven instalado.
+MySQL Server rodando localmente (porta 3306).
+
+
+Passos para configuração:
+
+
+Clone este repositório:
+
+
+bash   git clone https://github.com/Luis9768/Api-Barbearia.git
+   cd Api-Barbearia/barbershop-api
+
+
+Configure as credenciais do seu MySQL local em src/main/resources/application.properties.
+Rode a aplicação:
+
+
+bash   mvn spring-boot:run
+
+
+Acesse a documentação interativa em http://localhost:8080/swagger-ui/index.html.
