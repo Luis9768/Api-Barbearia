@@ -1,0 +1,44 @@
+
+Docker compose · YML
+services:
+  db:
+    image: mysql:8.0
+    container_name: barbearia-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-barbearia}
+      MYSQL_USER: ${DB_USER:-barbearia_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-barbearia_pass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: barbearia-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Spring Boot faz "relaxed binding": a variável de ambiente
+      # SPRING_DATASOURCE_URL vira automaticamente a propriedade
+      # spring.datasource.url (mesma lógica pra USERNAME/PASSWORD).
+      # Não precisa mudar nada no application.properties por causa disso.
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME:-barbearia}?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-barbearia_user}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-barbearia_pass}
+    ports:
+      - "8080:8080"
+
+volumes:
+  db_data:
+
+
