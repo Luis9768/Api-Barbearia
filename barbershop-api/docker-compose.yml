@@ -1,5 +1,3 @@
-
-Docker compose · YML
 services:
   db:
     image: mysql:8.0
@@ -28,10 +26,6 @@ services:
       db:
         condition: service_healthy
     environment:
-      # Spring Boot faz "relaxed binding": a variável de ambiente
-      # SPRING_DATASOURCE_URL vira automaticamente a propriedade
-      # spring.datasource.url (mesma lógica pra USERNAME/PASSWORD).
-      # Não precisa mudar nada no application.properties por causa disso.
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME:-barbearia}?useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-barbearia_user}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-barbearia_pass}
@@ -40,5 +34,3 @@ services:
 
 volumes:
   db_data:
-
-
