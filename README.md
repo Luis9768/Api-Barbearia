@@ -50,7 +50,7 @@ O sistema foi desenhado com separação clara de responsabilidades, utilizando o
 * **Containerização:** Dockerfile multi-stage (build separado do runtime, imagem final enxuta só com JRE) e docker-compose.yml orquestrando API + MySQL para ambiente local idêntico ao de produção.
 Integração Contínua: Workflow no GitHub Actions rodando testes automatizados e validando o build da imagem Docker a cada push/pull request na branch main, antes de qualquer deploy.
 
-🌐 Deploy
+### 🌐 Deploy
 
 A API está no ar, rodando em produção na Railway:
 
